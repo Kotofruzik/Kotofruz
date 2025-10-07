@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="8dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="12dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+
+        <!-- Фото пользователя -->
+        <ImageView
+            android:id="@+id/userImageView"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/users_icon"
+            android:scaleType="centerCrop"
+            android:background="@drawable/background"
+            android:contentDescription="Фото пользователя" />
+
+        <!-- Информация о пользователе -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:id="@+id/textName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Иван"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/textSurname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Иванов"
+                android:textSize="16sp"
+                android:textColor="@color/gray"/>
+
+            <TextView
+                android:id="@+id/textRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Роль: ученик"
+                android:textSize="14sp"
+                android:textColor="@color/black"/>
+
+            <!-- Кнопки -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/btnChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Чат"
+                    android:textAllCaps="false"
+                    android:drawableStart="@drawable/chats_icon"
+                    android:backgroundTint="@color/black"
+                    android:textColor="@android:color/white"
+                    android:layout_marginEnd="8dp"/>
+
+                <Button
+                    android:id="@+id/btnChangeRole"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Изменить роль"
+                    android:textAllCaps="false"
+                    android:drawableStart="@drawable/back"
+                    android:backgroundTint="@color/black"
+                    android:textColor="@android:color/white"
+                    android:layout_marginEnd="8dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

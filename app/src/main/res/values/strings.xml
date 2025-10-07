@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Автошкола БТГП</string>
+    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
+    <string name="back4app_app_id">Q1tuULttUpvqlPEzH2htnph5sHK6VJvD50rBsywv</string>
+    <string name="back4app_client_key">YOzg5tkHlzW08CBXggeOze8iG6Tx5LWx7gD83S33</string>
+    <string name="title_activity_navigation">NavigationActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="title_activity_admin">AdminActivity</string>
+    <string name="title_users">Users</string>
+    <string name="title_chats">Chats</string>
+    <string name="title_profile">Profile</string>
+</resources>

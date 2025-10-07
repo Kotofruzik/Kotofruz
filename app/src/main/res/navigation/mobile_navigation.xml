@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_users">
+
+    <fragment
+        android:id="@+id/navigation_users"
+        android:name="com.example.autoschoolbtgp.ui.users.UsersFragment"
+        android:label="@string/title_users"
+        tools:layout="@layout/fragment_users" />
+
+    <fragment
+        android:id="@+id/navigation_chats"
+        android:name="com.example.autoschoolbtgp.ui.chats.ChatsFragment"
+        android:label="@string/title_chats"
+        tools:layout="@layout/fragment_chats" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.autoschoolbtgp.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
+</navigation>
