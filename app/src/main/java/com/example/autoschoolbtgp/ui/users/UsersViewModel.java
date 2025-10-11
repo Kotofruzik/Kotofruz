@@ -4,11 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import com.example.autoschoolbtgp.ui.utils.ParseManager;
-import com.parse.FindCallback;
+import com.parse.FunctionCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UsersViewModel extends ViewModel {
     private MutableLiveData<List<UserModel>> usersLiveData = new MutableLiveData<>();
@@ -23,19 +26,33 @@ public class UsersViewModel extends ViewModel {
     }
 
     public void loadUsers() {
-        ParseManager.getAllUsers(new FindCallback<ParseUser>() {
+        ParseManager.getAllUsers(new FunctionCallback<List<Object>>() {
             @Override
-            public void done(List<ParseUser> parseUsers, ParseException e) {
+            public void done(List<Object> result, ParseException e) {
                 if (e == null) {
                     List<UserModel> users = new ArrayList<>();
-                    for (ParseUser user : parseUsers) {
-                        String id = user.getObjectId();
-                        String firstName = user.getString("firstName");
-                        String lastName = user.getString("lastName");
-                        String role = user.getString("role");
-                        String photoUrl = user.getParseFile("photo") != null ? user.getParseFile("photo").getUrl() : null;
+                    String currentUserId = ParseUser.getCurrentUser().getObjectId(); // Получаем ID текущего пользователя
 
-                        users.add(new UserModel(id, firstName, lastName, role, photoUrl));
+                    for (Object obj : result) {
+                        Map<String, Object> map = (Map<String, Object>) obj;
+                        String id = (String) map.get("id");
+
+                        // Пропускаем текущего пользователя
+                        if (id.equals(currentUserId)) {
+                            continue;
+                        }
+
+                        String firstName = (String) map.get("firstName");
+                        String lastName = (String) map.get("lastName");
+                        String role = (String) map.get("role");
+                        String photo = (String) map.get("photo");
+
+                        // Пропускаем пользователя с именем "kotofruzik"
+                        if ("kotofruzik".equals(firstName) || "kotofruzik".equals(lastName)) {
+                            continue;
+                        }
+
+                        users.add(new UserModel(id, firstName, lastName, role, photo));
                     }
                     usersLiveData.setValue(users);
                 } else {
@@ -46,27 +63,39 @@ public class UsersViewModel extends ViewModel {
     }
 
     public void changeUserRole(String userId, String newRole) {
-        ParseManager.changeUserRole(userId, newRole, e -> {
-            if (e == null) {
-                // Обновляем роль в LiveData
-                List<UserModel> currentUsers = usersLiveData.getValue();
-                if (currentUsers != null) {
-                    for (UserModel user : currentUsers) {
-                        if (user.getId().equals(userId)) {
-                            user.setRole(newRole);
-                            break;
+        ParseManager.changeUserRole(userId, newRole, new FunctionCallback<Map<String, Object>>() {
+            @Override
+            public void done(Map<String, Object> result, ParseException e) {
+                if (e == null) {
+                    // Обновляем роль в LiveData
+                    List<UserModel> currentUsers = usersLiveData.getValue();
+                    if (currentUsers != null) {
+                        for (UserModel user : currentUsers) {
+                            if (user.getId().equals(userId)) {
+                                user.setRole(newRole);
+                                break;
+                            }
                         }
+                        usersLiveData.setValue(currentUsers);
                     }
-                    usersLiveData.setValue(currentUsers);
+                } else {
+                    errorLiveData.setValue(e.getMessage());
                 }
-            } else {
-                errorLiveData.setValue(e.getMessage());
             }
         });
     }
 
     public void openChatWithUser(String targetUserId) {
-        // Если Cloud Function для чата всё ещё нужна — можно оставить
-        // или реализовать через ParseObject "Chat"
+        ParseManager.getOrCreateChat(targetUserId, new FunctionCallback<Map<String, Object>>() {
+            @Override
+            public void done(Map<String, Object> result, ParseException e) {
+                if (e == null) {
+                    String chatId = (String) result.get("chatId");
+                    // Здесь можно отправить событие в LiveData, чтобы фрагмент открыл чат
+                } else {
+                    errorLiveData.setValue(e.getMessage());
+                }
+            }
+        });
     }
 }

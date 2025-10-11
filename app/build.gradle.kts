@@ -62,7 +62,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation("com.github.parse-community.Parse-SDK-Android:parse:1.25.0")
+    implementation("com.github.parse-community.Parse-SDK-Android:parse:1.26.0")
     implementation("com.squareup.okhttp3:logging-interceptor:5.1.0")
 
     implementation("com.github.bumptech.glide:glide:5.0.5")
@@ -71,4 +71,5 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.google.android.material:material:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation("com.github.yalantis:ucrop:2.2.8")
 }

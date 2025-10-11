@@ -19,7 +19,7 @@ import java.util.List;
 
 public class UsersFragment extends Fragment {
     private UsersViewModel viewModel;
-    private UsersAdapter adapter;
+    private UsersAdapter adapter; // Убедись, что используешь UsersAdapter
 
     @Nullable
     @Override
@@ -49,12 +49,16 @@ public class UsersFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(UsersViewModel.class);
         viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
             if (users != null) {
+                android.util.Log.d("UsersFragment", "Получено " + users.size() + " пользователей");
                 adapter.updateUsers(users);
             }
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            // Показать ошибку, например, через Toast
+            if (error != null) {
+                android.util.Log.e("UsersFragment", "Ошибка: " + error);
+                // Если хочешь, можно показать ошибку через Snackbar или AlertDialog
+            }
         });
 
         viewModel.loadUsers();

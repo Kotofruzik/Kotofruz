@@ -16,14 +16,13 @@
         android:padding="12dp"
         android:background="?attr/selectableItemBackground">
 
-        <!-- Фото пользователя -->
-        <ImageView
+        <!-- Фото пользователя (круглое) -->
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/userImageView"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:src="@drawable/users_icon"
             android:scaleType="centerCrop"
-            android:background="@drawable/background"
             android:contentDescription="Фото пользователя" />
 
         <!-- Информация о пользователе -->

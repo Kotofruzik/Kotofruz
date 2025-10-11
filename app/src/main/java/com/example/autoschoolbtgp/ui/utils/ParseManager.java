@@ -1,35 +1,39 @@
 package com.example.autoschoolbtgp.ui.utils;
 
-import com.parse.FindCallback;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ParseManager {
 
     /**
-     * Загрузка списка пользователей
+     * Загрузка списка пользователей через Cloud Function
      */
-    public static void getAllUsers(FindCallback<ParseUser> callback) {
-        ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
-        query.findInBackground(callback);
+    public static void getAllUsers(FunctionCallback<List<Object>> callback) {
+        ParseCloud.callFunctionInBackground("getAllUsers", new HashMap<>(), callback);
     }
 
     /**
-     * Смена роли пользователя
+     * Смена роли пользователя через Cloud Function
      */
-    public static void changeUserRole(String userId, String newRole, SaveCallback callback) {
-        ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
-        query.getInBackground(userId, (user, e) -> {
-            if (e == null && user != null) {
-                user.put("role", newRole);
-                user.saveInBackground(callback);
-            } else {
-                android.util.Log.e("ParseManager", "Ошибка при получении пользователя: " + e.getMessage());
-            }
-        });
+    public static void changeUserRole(String userId, String newRole, FunctionCallback<Map<String, Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("newRole", newRole);
+        ParseCloud.callFunctionInBackground("changeUserRole", params, callback);
+    }
+
+    /**
+     * Создание/получение чата с пользователем через Cloud Function
+     */
+    public static void getOrCreateChat(String targetUserId, FunctionCallback<Map<String, Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("targetUserId", targetUserId);
+        ParseCloud.callFunctionInBackground("getOrCreateChat", params, callback);
     }
 
     /**
