@@ -6,15 +6,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.canhub.cropper.CropImageContract;
+import com.canhub.cropper.CropImageContractOptions;
+import com.canhub.cropper.CropImageView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -22,6 +29,7 @@ import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -35,6 +43,36 @@ public class RegisterActivity extends AppCompatActivity {
 
     private Uri selectedPhotoUri = null;
     private byte[] selectedPhotoBytes = null;
+
+    private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri selectedImageUri = result.getData().getData();
+                    if (selectedImageUri != null) {
+                        startCropActivity(selectedImageUri);
+                    }
+                }
+            });
+
+    private final ActivityResultLauncher<CropImageContractOptions> cropLauncher = registerForActivityResult(
+            new CropImageContract(),
+            result -> {
+                if (result.isSuccessful()) {
+                    Uri resultUri = result.getUriContent();
+                    if (resultUri != null) {
+                        handleCroppedImage(resultUri);
+                    } else {
+                        Toast.makeText(RegisterActivity.this, "Ошибка: URI результата ImageCropper был null.", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (!result.isSuccessful() && result.getError() == null) {
+                    Toast.makeText(RegisterActivity.this, "Обрезка фото отменена", Toast.LENGTH_SHORT).show();
+                } else {
+                    Exception error = result.getError();
+                    Toast.makeText(RegisterActivity.this, "Ошибка обрезки фото: " + (error != null ? error.getMessage() : "Неизвестная ошибка"), Toast.LENGTH_SHORT).show();
+                }
+                selectPhotoButton.setEnabled(true);
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +89,10 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.register_btn);
         backButton = findViewById(R.id.back_btn);
 
-        selectPhotoButton.setOnClickListener(v -> openImageChooser());
+        selectPhotoButton.setOnClickListener(v -> {
+            selectPhotoButton.setEnabled(false);
+            openImageChooser();
+        });
 
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
@@ -77,29 +118,38 @@ public class RegisterActivity extends AppCompatActivity {
     private void openImageChooser() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
-        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        galleryLauncher.launch(intent);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            selectedPhotoUri = data.getData();
-            photoImageView.setImageURI(selectedPhotoUri);
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedPhotoUri);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                int quality = 90;
-                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-                while (baos.toByteArray().length > 1024 * 1024 && quality > 10) {
-                    baos.reset();
-                    quality -= 10;
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-                }
-                selectedPhotoBytes = baos.toByteArray();
-            } catch (IOException e) {
-                Toast.makeText(this, "Ошибка обработки изображения: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
+    private void startCropActivity(Uri sourceUri) {
+        File destinationFile = new File(getCacheDir(), "cropped_image_senior.jpg");
+        Uri destinationUri = Uri.fromFile(destinationFile);
+
+        CropImageContractOptions options = new CropImageContractOptions(sourceUri, new com.canhub.cropper.CropImageOptions());
+        options.setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1, 1)
+                .setFixAspectRatio(true)
+                .setCropShape(CropImageView.CropShape.OVAL)
+                .setRequestedSize(1024, 1024)
+                .setOutputCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setOutputCompressQuality(85);
+
+        cropLauncher.launch(options);
+    }
+
+    private void handleCroppedImage(Uri croppedImageUri) {
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), croppedImageUri);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos);
+            byte[] imageBytes = baos.toByteArray();
+
+            selectedPhotoBytes = imageBytes;
+            photoImageView.setImageURI(croppedImageUri);
+
+        } catch (IOException e) {
+            Toast.makeText(this, "Ошибка обработки фото: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            selectPhotoButton.setEnabled(true);
         }
     }
 
@@ -119,7 +169,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    if (selectedPhotoBytes != null) {
+                    if (selectedPhotoBytes != null && selectedPhotoBytes.length > 0) {
                         uploadPhotoAndSaveUser(user, selectedPhotoBytes);
                     } else {
                         onRegistrationSuccess();
@@ -133,24 +183,18 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void uploadPhotoAndSaveUser(ParseUser user, byte[] photoBytes) {
         ParseFile photoFile = new ParseFile("profile_photo.jpg", photoBytes);
-        photoFile.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    user.put("photo", photoFile);
-                    user.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                onRegistrationSuccess();
-                            } else {
-                                Toast.makeText(RegisterActivity.this, "Ошибка сохранения фото: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
-                } else {
-                    Toast.makeText(RegisterActivity.this, "Ошибка загрузки фото: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
+        photoFile.saveInBackground((SaveCallback) e -> {
+            if (e == null) {
+                user.put("photo", photoFile);
+                user.saveInBackground((SaveCallback) e2 -> {
+                    if (e2 == null) {
+                        onRegistrationSuccess();
+                    } else {
+                        Toast.makeText(RegisterActivity.this, "Ошибка сохранения фото: " + e2.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            } else {
+                Toast.makeText(RegisterActivity.this, "Ошибка загрузки фото: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

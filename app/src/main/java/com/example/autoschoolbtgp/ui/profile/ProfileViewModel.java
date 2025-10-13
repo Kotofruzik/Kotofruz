@@ -1,7 +1,5 @@
 package com.example.autoschoolbtgp.ui.profile;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,11 +11,10 @@ import com.parse.SaveCallback;
 
 public class ProfileViewModel extends ViewModel {
 
-    private static final String TAG = "ProfileViewModel_SENIOR";
-
     private MutableLiveData<UserModel> userData = new MutableLiveData<>();
     private MutableLiveData<String> error = new MutableLiveData<>();
     private MutableLiveData<String> successMessage = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isPhotoUploading = new MutableLiveData<>(false);
 
     private byte[] newPhotoBytes = null;
 
@@ -33,8 +30,11 @@ public class ProfileViewModel extends ViewModel {
         return successMessage;
     }
 
+    public LiveData<Boolean> getIsPhotoUploading() {
+        return isPhotoUploading;
+    }
+
     public void loadCurrentUser() {
-        Log.d(TAG, "loadCurrentUser: Начало загрузки данных текущего пользователя из Parse.");
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
             String id = currentUser.getObjectId();
@@ -47,19 +47,13 @@ public class ProfileViewModel extends ViewModel {
             ParseFile photoFile = currentUser.getParseFile("photo");
             if (photoFile != null) {
                 photoUrl = photoFile.getUrl();
-                Log.d(TAG, "loadCurrentUser: URL фото пользователя из ParseFile: " + photoUrl);
-            } else {
-                Log.d(TAG, "loadCurrentUser: У пользователя нет фото (ParseFile 'photo' отсутствует или null).");
             }
 
             UserModel model = new UserModel(id, firstName, lastName, role, photoUrl);
             model.setMiddleName(middleName);
             userData.setValue(model);
-            Log.d(TAG, "loadCurrentUser: Данные пользователя загружены и переданы в LiveData.");
         } else {
-            String errorMsg = "Пользователь не авторизован";
-            Log.w(TAG, "loadCurrentUser: " + errorMsg);
-            error.setValue(errorMsg);
+            error.setValue("Пользователь не авторизован");
         }
     }
 
@@ -67,82 +61,62 @@ public class ProfileViewModel extends ViewModel {
         this.newPhotoBytes = bytes;
     }
 
-    public void updateProfile(String firstName, String lastName, String middleName, String newPassword) {
-        Log.d(TAG, "updateProfile: Начало обновления профиля. Имя: " + firstName + ", Фамилия: " + lastName + ", Отчество: " + middleName + ", Пароль меняется: " + (!newPassword.isEmpty()));
-        ParseUser user = ParseUser.getCurrentUser();
-        if (user == null) {
-            String errorMsg = "Пользователь не авторизован";
-            Log.e(TAG, "updateProfile: " + errorMsg);
-            error.setValue(errorMsg);
+    public void uploadNewPhotoAndSaveProfile(byte[] imageBytes) {
+        if (imageBytes == null || imageBytes.length == 0) {
+            error.setValue("Невозможно загрузить пустое фото");
+            isPhotoUploading.setValue(false);
             return;
         }
 
-        user.put("firstName", firstName);
-        user.put("lastName", lastName);
-        user.put("middleName", middleName);
-
-        if (!newPassword.isEmpty()) {
-            user.setPassword(newPassword);
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser == null) {
+            error.setValue("Пользователь не авторизован");
+            isPhotoUploading.setValue(false);
+            return;
         }
 
-        if (newPhotoBytes != null && newPhotoBytes.length > 0) {
-            Log.d(TAG, "updateProfile: Новое фото выбрано. Начинаем загрузку.");
-            ParseFile photoFile = new ParseFile("profile_photo.jpg", newPhotoBytes);
-            photoFile.saveInBackground((com.parse.SaveCallback)e -> {
-                if (e == null) {
-                    Log.d(TAG, "updateProfile: Файл фото загружен. URL: " + photoFile.getUrl());
-                    user.put("photo", photoFile);
-                    saveUser(user);
-                } else {
-                    String errorMsg = "Ошибка загрузки фото: " + e.getMessage();
-                    Log.e(TAG, "updateProfile: " + errorMsg, e);
-                    error.setValue(errorMsg);
-                }
-            });
-        } else {
-            Log.d(TAG, "updateProfile: Новое фото не выбрано или байты пусты. Сохраняем только текстовые данные.");
-            saveUser(user);
-        }
+        isPhotoUploading.setValue(true);
+
+        ParseFile photoFile = new ParseFile("profile_photo.jpg", imageBytes);
+        photoFile.saveInBackground((com.parse.SaveCallback) e -> {
+            if (e == null) {
+                saveUserWithNewPhoto(currentUser, photoFile);
+            } else {
+                isPhotoUploading.setValue(false);
+                error.setValue("Ошибка загрузки фото: " + e.getMessage());
+            }
+        });
     }
 
-    private void saveUser(ParseUser user) {
-        user.saveInBackground(e -> {
+    private void saveUserWithNewPhoto(ParseUser user, ParseFile newPhotoFile) {
+        user.put("photo", newPhotoFile);
+
+        user.saveInBackground((SaveCallback) e -> {
+            isPhotoUploading.setValue(false);
             if (e == null) {
-                Log.d(TAG, "saveUser: Пользователь успешно сохранён.");
-                successMessage.setValue("Профиль обновлён");
+                successMessage.setValue("Фото профиля успешно обновлено!");
 
                 String id = user.getObjectId();
                 String firstName = user.getString("firstName");
                 String lastName = user.getString("lastName");
                 String middleName = user.getString("middleName");
                 String role = user.getString("role");
-
-                String photoUrl = null;
-                ParseFile photoFile = user.getParseFile("photo");
-                if (photoFile != null) {
-                    photoUrl = photoFile.getUrl();
-                }
+                String photoUrl = newPhotoFile.getUrl();
 
                 UserModel updatedModel = new UserModel(id, firstName, lastName, role, photoUrl);
                 updatedModel.setMiddleName(middleName);
                 userData.setValue(updatedModel);
 
-                newPhotoBytes = null;
             } else {
-                String errorMsg = "Ошибка сохранения: " + e.getMessage();
-                Log.e(TAG, "saveUser: " + errorMsg, e);
-                error.setValue(errorMsg);
+                error.setValue("Ошибка сохранения профиля: " + e.getMessage());
             }
         });
     }
 
     public void updateProfileTextOnly(String firstName, String lastName, String middleName, String newPassword) {
-        Log.d(TAG, "updateProfileTextOnly: Начало обновления текстовых данных профиля.");
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser == null) {
-            String errorMsg = "Пользователь не авторизован";
-            Log.e(TAG, "updateProfileTextOnly: " + errorMsg);
-            error.setValue(errorMsg);
+            error.setValue("Пользователь не авторизован");
             return;
         }
 
@@ -154,34 +128,24 @@ public class ProfileViewModel extends ViewModel {
             currentUser.setPassword(newPassword);
         }
 
-        currentUser.saveInBackground(e -> {
+        currentUser.saveInBackground((SaveCallback) e -> {
             if (e == null) {
-                Log.d(TAG, "updateProfileTextOnly: Текстовые данные успешно сохранены.");
                 successMessage.setValue("Текстовые данные профиля обновлены.");
 
                 String id = currentUser.getObjectId();
-                String role = currentUser.getString("role");
+                String currentPhotoUrl = (userData.getValue() != null) ? userData.getValue().getAvatarUrl() : null;
 
-                String photoUrl = null;
-                ParseFile photoFile = currentUser.getParseFile("photo");
-                if (photoFile != null) {
-                    photoUrl = photoFile.getUrl();
-                }
-
-                UserModel updatedModel = new UserModel(id, firstName, lastName, role, photoUrl);
+                UserModel updatedModel = new UserModel(id, firstName, lastName, currentUser.getString("role"), currentPhotoUrl);
                 updatedModel.setMiddleName(middleName);
                 userData.setValue(updatedModel);
 
             } else {
-                String errorMsg = "Ошибка сохранения текстовых данных: " + e.getMessage();
-                Log.e(TAG, "updateProfileTextOnly: " + errorMsg, e);
-                error.setValue(errorMsg);
+                error.setValue("Ошибка сохранения данных: " + e.getMessage());
             }
         });
     }
 
     public void logout() {
-        Log.d(TAG, "logout: Выход пользователя из системы.");
         ParseUser.logOut();
     }
 }

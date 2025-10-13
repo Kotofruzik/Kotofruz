@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,28 +19,51 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.canhub.cropper.CropImageContract;
+import com.canhub.cropper.CropImageContractOptions;
+import com.canhub.cropper.CropImageView;
+import com.example.autoschoolbtgp.LoginActivity;
 import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.databinding.FragmentProfileBinding;
 import com.example.autoschoolbtgp.ui.users.UserModel;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 public class ProfileFragment extends Fragment {
-
-    private static final String TAG = "ProfileFragment_SENIOR";
     private FragmentProfileBinding binding;
     private ProfileViewModel viewModel;
 
-    // Лаунчер для выбора фото из галереи
     private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
                     Uri selectedImageUri = result.getData().getData();
                     if (selectedImageUri != null) {
-                        handleSelectedImage(selectedImageUri);
+                        startCropActivity(selectedImageUri);
                     }
+                }
+            });
+
+    private final ActivityResultLauncher<CropImageContractOptions> cropLauncher = registerForActivityResult(
+            new CropImageContract(),
+            result -> {
+                if (result.isSuccessful()) {
+                    Uri resultUri = result.getUriContent();
+                    if (resultUri != null) {
+                        handleCroppedImage(resultUri);
+                    } else {
+                        Toast.makeText(requireContext(), "Ошибка: URI результата ImageCropper был null.", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (!result.isSuccessful() && result.getError() == null) {
+                    Toast.makeText(requireContext(), "Обрезка фото отменена", Toast.LENGTH_SHORT).show();
+                } else {
+                    Exception error = result.getError();
+                    Toast.makeText(requireContext(), "Ошибка обрезки фото: " + (error != null ? error.getMessage() : "Неизвестная ошибка"), Toast.LENGTH_SHORT).show();
+                }
+                if (binding != null) {
+                    binding.btnChangePhoto.setEnabled(true);
                 }
             });
 
@@ -58,10 +80,8 @@ public class ProfileFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
-        // Загрузка текущих данных
         viewModel.loadCurrentUser();
 
-        // Обновление UI из ViewModel
         viewModel.getUserData().observe(getViewLifecycleOwner(), userModel -> {
             if (userModel != null) {
                 binding.editFirstName.setText(userModel.getName());
@@ -83,15 +103,19 @@ public class ProfileFragment extends Fragment {
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                Log.e(TAG, "Ошибка: " + error);
                 Toast.makeText(requireContext(), "Ошибка: " + error, Toast.LENGTH_LONG).show();
+                if (binding != null) {
+                    binding.btnChangePhoto.setEnabled(true);
+                }
             }
         });
 
         viewModel.getSuccessMessage().observe(getViewLifecycleOwner(), message -> {
             if (message != null) {
-                Log.d(TAG, "Сообщение: " + message);
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                if (binding != null) {
+                    binding.btnChangePhoto.setEnabled(true);
+                }
             }
         });
 
@@ -102,6 +126,7 @@ public class ProfileFragment extends Fragment {
 
     private void setupClickListeners() {
         binding.btnChangePhoto.setOnClickListener(v -> {
+            binding.btnChangePhoto.setEnabled(false);
             openGallery();
         });
 
@@ -121,10 +146,10 @@ public class ProfileFragment extends Fragment {
 
         binding.btnLogout.setOnClickListener(v -> {
             viewModel.logout();
-            // TODO: Добавьте навигацию на экран входа
-            // Intent intent = new Intent(requireContext(), LoginActivity.class);
-            // startActivity(intent);
-            // requireActivity().finish();
+
+            Intent intent = new Intent(requireContext(), LoginActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
         });
     }
 
@@ -133,33 +158,37 @@ public class ProfileFragment extends Fragment {
         galleryLauncher.launch(intent);
     }
 
-    private void handleSelectedImage(Uri selectedImageUri) {
-        Log.d(TAG, "handleSelectedImage: Начало обработки выбранного изображения. URI: " + selectedImageUri);
+    private void startCropActivity(Uri sourceUri) {
+        File destinationFile = new File(requireContext().getCacheDir(), "cropped_image_senior.jpg");
+        Uri destinationUri = Uri.fromFile(destinationFile);
+
+        CropImageContractOptions options = new CropImageContractOptions(sourceUri, new com.canhub.cropper.CropImageOptions());
+        options.setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1, 1)
+                .setFixAspectRatio(true)
+                .setCropShape(CropImageView.CropShape.OVAL)
+                .setRequestedSize(1024, 1024)
+                .setOutputCompressFormat(Bitmap.CompressFormat.JPEG)
+                .setOutputCompressQuality(85);
+
+        cropLauncher.launch(options);
+    }
+
+    private void handleCroppedImage(Uri croppedImageUri) {
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), selectedImageUri);
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), croppedImageUri);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 85, baos);
             byte[] imageBytes = baos.toByteArray();
-            Log.d(TAG, "handleSelectedImage: Изображение конвертировано в byte[], размер: " + imageBytes.length + " байт.");
 
-            // Передаем байты в ViewModel
-            viewModel.setNewPhotoBytes(imageBytes);
-
-            // Обновляем изображение в UI сразу после выбора
-            binding.profileImage.setImageURI(selectedImageUri);
-
-            // --- ВАЖНО: Вызываем updateProfile сразу после выбора фото ---
-            String firstName = binding.editFirstName.getText().toString().trim();
-            String lastName = binding.editLastName.getText().toString().trim();
-            String middleName = binding.editMiddleName.getText().toString().trim();
-            String password = binding.editPassword.getText().toString().trim();
-
-            viewModel.updateProfile(firstName, lastName, middleName, password);
-            // ---
+            viewModel.uploadNewPhotoAndSaveProfile(imageBytes);
+            binding.profileImage.setImageURI(croppedImageUri);
 
         } catch (IOException e) {
-            Log.e(TAG, "Ошибка при обработке выбранного изображения", e);
             Toast.makeText(requireContext(), "Ошибка обработки фото: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            if (binding != null) {
+                binding.btnChangePhoto.setEnabled(true);
+            }
         }
     }
 
