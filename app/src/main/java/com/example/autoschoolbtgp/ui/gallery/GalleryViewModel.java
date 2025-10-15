@@ -1,16 +1,16 @@
-package com.example.autoschoolbtgp.ui.chats;
+package com.example.autoschoolbtgp.ui.gallery;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class ChatsViewModel extends ViewModel {
+public class GalleryViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public ChatsViewModel() {
+    public GalleryViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is chats fragment");
+        mText.setValue("This is gallery fragment");
     }
 
     public LiveData<String> getText() {

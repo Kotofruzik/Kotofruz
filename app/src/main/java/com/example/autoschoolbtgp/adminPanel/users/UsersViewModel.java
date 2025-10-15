@@ -1,15 +1,14 @@
-package com.example.autoschoolbtgp.ui.users;
+package com.example.autoschoolbtgp.users;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import com.example.autoschoolbtgp.ui.utils.ParseManager;
+import com.example.autoschoolbtgp.utils.ParseManager;
 import com.parse.FunctionCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

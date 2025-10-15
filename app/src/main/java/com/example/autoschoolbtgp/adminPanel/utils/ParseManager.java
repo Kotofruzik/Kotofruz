@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.utils;
+package com.example.autoschoolbtgp.utils;
 
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;

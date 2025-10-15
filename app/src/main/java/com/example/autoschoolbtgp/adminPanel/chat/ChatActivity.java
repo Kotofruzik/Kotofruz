@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.chat;
+package com.example.autoschoolbtgp.chat;
 
 import android.os.Bundle;
 

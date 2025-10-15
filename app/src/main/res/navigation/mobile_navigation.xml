@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_users"
-        android:name="com.example.autoschoolbtgp.ui.users.UsersFragment"
+        android:name="com.example.autoschoolbtgp.adminPanel.users.UsersFragment"
         android:label="@string/title_users"
         tools:layout="@layout/fragment_users" />
 
     <fragment
         android:id="@+id/navigation_chats"
-        android:name="com.example.autoschoolbtgp.ui.chats.ChatsFragment"
+        android:name="com.example.autoschoolbtgp.adminPanel.chats.ChatsFragment"
         android:label="@string/title_chats"
         tools:layout="@layout/fragment_chats" />
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.autoschoolbtgp.ui.profile.ProfileFragment"
+        android:name="com.example.autoschoolbtgp.adminPanel.profile.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_profile" />
 </navigation>

@@ -47,7 +47,7 @@ public class AdminActivity extends AppCompatActivity {
                     ParseUser user = (ParseUser) userObject;
                     String role = user.getString("role");
                     if (role != null) {
-                        if (!"admin".equals(role)) {
+                        if (!"layout/admin".equals(role)) {
                             // Если роль изменилась и пользователь больше не админ, направляем на нужный экран
                             Intent intent;
                             switch (role) {

@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.chats;
+package com.example.autoschoolbtgp.ui.slideshow;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.autoschoolbtgp.databinding.FragmentChatsBinding;
+import com.example.autoschoolbtgp.databinding.FragmentSlideshowBinding;
 
-public class ChatsFragment extends Fragment {
+public class SlideshowFragment extends Fragment {
 
-    private FragmentChatsBinding binding;
+    private FragmentSlideshowBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ChatsViewModel chatsViewModel =
-                new ViewModelProvider(this).get(ChatsViewModel.class);
+        SlideshowViewModel slideshowViewModel =
+                new ViewModelProvider(this).get(SlideshowViewModel.class);
 
-        binding = FragmentChatsBinding.inflate(inflater, container, false);
+        binding = FragmentSlideshowBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textChats;
-        chatsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textSlideshow;
+        slideshowViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

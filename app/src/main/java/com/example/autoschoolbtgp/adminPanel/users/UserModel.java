@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.users;
+package com.example.autoschoolbtgp.users;
 
 public class UserModel {
     private String objectId;

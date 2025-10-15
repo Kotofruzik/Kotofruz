@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.profile;
+package com.example.autoschoolbtgp.profile;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,7 +25,6 @@ import com.canhub.cropper.CropImageView;
 import com.example.autoschoolbtgp.LoginActivity;
 import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.databinding.FragmentProfileBinding;
-import com.example.autoschoolbtgp.ui.users.UserModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

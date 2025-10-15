@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.users;
+package com.example.autoschoolbtgp.users;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,7 +89,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UsersViewHol
         }
 
         private void showRoleSelectionDialog(android.content.Context context, UserModel user, OnUserActionsListener listener) {
-            String[] roles = {"admin", "instructor", "student"};
+            String[] roles = {"layout/admin", "instructor", "student"};
             String currentRole = user.getRole();
 
             // Найдем индекс текущей роли
