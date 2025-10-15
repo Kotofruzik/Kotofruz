@@ -1,9 +1,13 @@
-package com.example.autoschoolbtgp;
+package com.example.autoschoolbtgp.adminPanel;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.example.autoschoolbtgp.InstructorActivity;
+import com.example.autoschoolbtgp.LoginActivity;
+import com.example.autoschoolbtgp.R;
+import com.example.autoschoolbtgp.StudentActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,7 +51,7 @@ public class AdminActivity extends AppCompatActivity {
                     ParseUser user = (ParseUser) userObject;
                     String role = user.getString("role");
                     if (role != null) {
-                        if (!"layout/admin".equals(role)) {
+                        if (!"admin".equals(role)) {
                             // Если роль изменилась и пользователь больше не админ, направляем на нужный экран
                             Intent intent;
                             switch (role) {

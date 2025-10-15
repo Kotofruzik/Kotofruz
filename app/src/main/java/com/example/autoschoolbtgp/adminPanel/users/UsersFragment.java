@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.users;
+package com.example.autoschoolbtgp.adminPanel.users;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.autoschoolbtgp.R;
-import com.example.autoschoolbtgp.chat.ChatActivity;
+import com.example.autoschoolbtgp.adminPanel.chat.ChatActivity;
 
 public class UsersFragment extends Fragment {
     private UsersViewModel viewModel;

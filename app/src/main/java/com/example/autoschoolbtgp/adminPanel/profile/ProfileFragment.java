@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.profile;
+package com.example.autoschoolbtgp.adminPanel.profile;
 
 import android.content.Intent;
 import android.graphics.Bitmap;

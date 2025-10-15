@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.autoschoolbtgp.adminPanel.AdminActivity;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -83,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         } else if ("instructor".equals(role)) {
             startActivity(new Intent(this, InstructorActivity.class));
         } else {
-            startActivity(new Intent(this, StudentActivity.class));
+            startActivity(new Intent(this, StudentActivityTwo.class));
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.utils;
+package com.example.autoschoolbtgp.adminPanel.utils;
 
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;

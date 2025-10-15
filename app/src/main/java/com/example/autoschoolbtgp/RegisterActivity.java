@@ -201,7 +201,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void onRegistrationSuccess() {
         Toast.makeText(RegisterActivity.this, "Регистрация прошла успешно", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(RegisterActivity.this, StudentActivity.class));
+        startActivity(new Intent(RegisterActivity.this, StudentActivityTwo.class));
         finish();
     }
 }

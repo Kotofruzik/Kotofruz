@@ -1,9 +1,9 @@
-package com.example.autoschoolbtgp.users;
+package com.example.autoschoolbtgp.adminPanel.users;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import com.example.autoschoolbtgp.utils.ParseManager;
+import com.example.autoschoolbtgp.adminPanel.utils.ParseManager;
 import com.parse.FunctionCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;

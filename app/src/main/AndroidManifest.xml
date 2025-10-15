@@ -16,14 +16,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AutoschoolBTGP">
         <activity
-            android:name=".ui.chat.ChatActivity"
-            android:exported="false" />
-        <activity android:name="com.canhub.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat"/>
-        <activity
-            android:name=".AdminActivity"
+            android:name=".StudentActivityTwo"
             android:exported="false"
-            android:label="@string/title_activity_admin"/>
+            android:label="@string/title_activity_student_two"
+            android:theme="@style/Theme.AutoschoolBTGP.NoActionBar" />
+        <activity
+            android:name=".adminPanel.chat.ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+        <activity
+            android:name=".adminPanel.AdminActivity"
+            android:exported="false"
+            android:label="@string/title_activity_admin" />
         <activity
             android:name=".StudentActivity"
             android:exported="false" />

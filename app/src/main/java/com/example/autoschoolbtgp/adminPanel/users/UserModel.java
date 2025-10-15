@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.users;
+package com.example.autoschoolbtgp.adminPanel.users;
 
 public class UserModel {
     private String objectId;
