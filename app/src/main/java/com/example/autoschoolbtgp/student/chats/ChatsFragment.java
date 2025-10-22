@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.slideshow;
+package com.example.autoschoolbtgp.student.main;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.autoschoolbtgp.databinding.FragmentSlideshowBinding;
+import com.example.autoschoolbtgp.databinding.FragmentGalleryBinding;
 
-public class SlideshowFragment extends Fragment {
+public class MainFragment extends Fragment {
 
-    private FragmentSlideshowBinding binding;
+    private FragmentGalleryBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        SlideshowViewModel slideshowViewModel =
-                new ViewModelProvider(this).get(SlideshowViewModel.class);
+        MainViewModel mainViewModel =
+                new ViewModelProvider(this).get(MainViewModel.class);
 
-        binding = FragmentSlideshowBinding.inflate(inflater, container, false);
+        binding = FragmentGalleryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textSlideshow;
-        slideshowViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textGallery;
+        mainViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

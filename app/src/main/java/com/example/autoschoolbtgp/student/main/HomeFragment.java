@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.ui.home;
+package com.example.autoschoolbtgp.student.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
