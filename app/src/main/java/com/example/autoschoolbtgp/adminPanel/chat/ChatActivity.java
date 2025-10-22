@@ -1,3 +1,4 @@
+// ChatActivity.java
 package com.example.autoschoolbtgp.adminPanel.chat;
 
 import android.os.Bundle;
@@ -15,10 +16,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.autoschoolbtgp.R;
-import com.example.autoschoolbtgp.adminPanel.chats.ChatsViewModel;
+import com.example.autoschoolbtgp.adminPanel.chats.ChatViewModel; // <-- Используем ChatViewModel
 
 public class ChatActivity extends AppCompatActivity {
-    private ChatsViewModel viewModel;
+    private ChatViewModel viewModel; // <-- Используем ChatViewModel
     private MessageAdapter adapter;
 
     @Override
@@ -45,7 +46,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         // Инициализация ViewModel
-        viewModel = new ViewModelProvider(this).get(ChatsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ChatViewModel.class); // <-- Используем ChatViewModel
 
         // --- Наблюдение за сообщениями ---
         viewModel.getMessages().observe(this, messages -> {
@@ -72,7 +73,7 @@ public class ChatActivity extends AppCompatActivity {
         // Загрузка сообщений
         String chatId = getIntent().getStringExtra("chatId");
         if (chatId != null) {
-            viewModel.loadMessages(chatId);
+            viewModel.loadMessages(chatId); // <-- Вызываем loadMessages из ChatViewModel
         } else {
             Toast.makeText(this, "Ошибка: chatId не передан", Toast.LENGTH_SHORT).show();
         }
@@ -81,7 +82,7 @@ public class ChatActivity extends AppCompatActivity {
         buttonSend.setOnClickListener(v -> {
             String text = editTextMessage.getText().toString().trim();
             if (!text.isEmpty() && chatId != null) {
-                viewModel.sendMessage(chatId, text);
+                viewModel.sendMessage(chatId, text); // <-- Вызываем sendMessage из ChatViewModel
                 editTextMessage.setText(""); // Очищаем поле ввода
             } else if (text.isEmpty()) {
                 Toast.makeText(this, "Введите сообщение", Toast.LENGTH_SHORT).show();

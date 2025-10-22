@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.adminPanel.chats.MessageModel;
 
@@ -40,18 +39,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     static class MessageViewHolder extends RecyclerView.ViewHolder {
-        TextView textMessage, textSender, textTime;
+        TextView textSenderName, textMessage, textTime;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
+            textSenderName = itemView.findViewById(R.id.text_sender_name);
             textMessage = itemView.findViewById(R.id.text_message);
-            textSender = itemView.findViewById(R.id.text_sender);
             textTime = itemView.findViewById(R.id.text_time);
         }
 
         public void bind(MessageModel message) {
+            textSenderName.setText(message.getSenderName());
             textMessage.setText(message.getText());
-            textSender.setText(message.getSenderName());
             textTime.setText(message.getCreatedAt());
         }
     }

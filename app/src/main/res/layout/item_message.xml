@@ -7,7 +7,7 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/text_sender"
+        android:id="@+id/text_sender_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Имя отправителя"

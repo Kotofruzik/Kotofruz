@@ -96,7 +96,6 @@ public class UsersViewModel extends ViewModel {
             public void done(Map<String, Object> result, ParseException e) {
                 if (e == null) {
                     String chatId = (String) result.get("chatId");
-                    // Здесь можно отправить событие в LiveData, чтобы фрагмент открыл чат
                 } else {
                     errorLiveData.setValue(e.getMessage());
                 }
