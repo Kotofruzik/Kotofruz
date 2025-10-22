@@ -3,7 +3,7 @@ package com.example.autoschoolbtgp.adminPanel.users;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import com.example.autoschoolbtgp.adminPanel.utils.ParseManager;
+import com.example.autoschoolbtgp.utils.ParseManager;
 import com.parse.FunctionCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -15,6 +15,8 @@ import java.util.Map;
 public class UsersViewModel extends ViewModel {
     private MutableLiveData<List<UserModel>> usersLiveData = new MutableLiveData<>();
     private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> successMessageLiveData = new MutableLiveData<>();
+
 
     public LiveData<List<UserModel>> getUsers() {
         return usersLiveData;
@@ -23,6 +25,10 @@ public class UsersViewModel extends ViewModel {
     public LiveData<String> getError() {
         return errorLiveData;
     }
+    public LiveData<String> getSuccessMessage() {
+        return successMessageLiveData;
+    }
+
 
     public void loadUsers() {
         ParseManager.getAllUsers(new FunctionCallback<List<Object>>() {

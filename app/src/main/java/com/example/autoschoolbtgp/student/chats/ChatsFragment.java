@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.student.main;
+package com.example.autoschoolbtgp.student.chats;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,20 +12,20 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.autoschoolbtgp.databinding.FragmentGalleryBinding;
 
-public class MainFragment extends Fragment {
+public class ChatsFragment extends Fragment {
 
     private FragmentGalleryBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        MainViewModel mainViewModel =
-                new ViewModelProvider(this).get(MainViewModel.class);
+        ChatsViewModel chatsViewModel =
+                new ViewModelProvider(this).get(ChatsViewModel.class);
 
         binding = FragmentGalleryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         final TextView textView = binding.textGallery;
-        mainViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        chatsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

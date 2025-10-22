@@ -16,9 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AutoschoolBTGP">
         <activity
-            android:name=".StudentActivityTwo"
+            android:name=".StudentActivity"
             android:exported="false"
-            android:label="@string/title_activity_student_two"
+            android:label="@string/title_activity_student"
             android:theme="@style/Theme.AutoschoolBTGP.NoActionBar" />
         <activity
             android:name=".adminPanel.chat.ChatActivity"
@@ -30,9 +30,6 @@
             android:name=".adminPanel.AdminActivity"
             android:exported="false"
             android:label="@string/title_activity_admin" />
-        <activity
-            android:name=".StudentActivity"
-            android:exported="false" />
         <activity
             android:name=".InstructorActivity"
             android:exported="false" />

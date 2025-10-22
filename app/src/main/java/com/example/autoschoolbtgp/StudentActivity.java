@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import androidx.navigation.NavController;
@@ -21,23 +24,24 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.autoschoolbtgp.adminPanel.AdminActivity;
-import com.example.autoschoolbtgp.databinding.ActivityStudentTwoBinding;
+import de.hdodenhof.circleimageview.CircleImageView;
 
-public class StudentActivityTwo extends AppCompatActivity {
+import com.example.autoschoolbtgp.adminPanel.AdminActivity;
+import com.example.autoschoolbtgp.databinding.ActivityStudentBinding;
+
+public class StudentActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
-    private ActivityStudentTwoBinding binding;
+    private ActivityStudentBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        binding = ActivityStudentTwoBinding.inflate(getLayoutInflater());
+        binding = ActivityStudentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Применяем системные insets к корневому View
         View rootView = binding.getRoot();
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -85,7 +89,6 @@ public class StudentActivityTwo extends AppCompatActivity {
             }
 
             String role = userObj.getString("role");
-            // Если роль не задана — ошибка данных → на логин
             if (role == null || role.isEmpty()) {
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Роль пользователя не установлена", Toast.LENGTH_SHORT).show();
@@ -94,7 +97,6 @@ public class StudentActivityTwo extends AppCompatActivity {
                 return;
             }
 
-            // Если роль НЕ студент — перенаправляем
             if (!"student".equals(role)) {
                 Intent intent;
                 if ("admin".equals(role)) {
@@ -109,9 +111,60 @@ public class StudentActivityTwo extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 });
+                return;
             }
-            // Если роль "student" — остаёмся в StudentActivityTwo
+
+            // ✅ Пользователь — студент → обновляем шапку
+            runOnUiThread(this::updateNavHeaderWithUser);
         });
+    }
+
+    private void updateNavHeaderWithUser() {
+        ParseUser user = ParseUser.getCurrentUser();
+        if (user == null) return; // на всякий случай
+
+        NavigationView navigationView = binding.navView;
+        View headerView = navigationView.getHeaderView(0);
+
+        CircleImageView navAvatar = headerView.findViewById(R.id.navAvatar);
+        TextView navName = headerView.findViewById(R.id.navName);
+        TextView navEmail = headerView.findViewById(R.id.navEmail);
+
+        // === Имя и фамилия ===
+        String firstName = user.getString("firstName");
+        String lastName = user.getString("lastName");
+
+        String fullName = "";
+        if (firstName != null && !firstName.trim().isEmpty()) {
+            fullName = firstName.trim();
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                fullName += " " + lastName.trim();
+            }
+        } else if (lastName != null && !lastName.trim().isEmpty()) {
+            fullName = lastName.trim();
+        } else {
+            fullName = user.getUsername(); // fallback
+        }
+
+        navName.setText(fullName);
+
+        // === Email ===
+        String email = user.getEmail();
+        navEmail.setText(email != null ? email : "");
+
+        // === Аватар ===
+        ParseFile photoFile = user.getParseFile("photo"); // ← поле "photo"
+        String photoUrl = photoFile != null ? photoFile.getUrl() : null;
+
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(photoUrl)
+                    .placeholder(R.drawable.username_icon)
+                    .error(R.drawable.username_icon)
+                    .into(navAvatar);
+        } else {
+            navAvatar.setImageResource(R.drawable.username_icon);
+        }
     }
 
     private void redirectToLogin() {
@@ -122,7 +175,7 @@ public class StudentActivityTwo extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.student_activity_two, menu);
+        getMenuInflater().inflate(R.menu.student_activity, menu);
         return true;
     }
 

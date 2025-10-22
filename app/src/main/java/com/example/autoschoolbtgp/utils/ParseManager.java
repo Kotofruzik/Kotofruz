@@ -1,8 +1,13 @@
-package com.example.autoschoolbtgp.adminPanel.utils;
+package com.example.autoschoolbtgp.utils;
 
 import com.parse.FunctionCallback;
+import com.parse.Parse;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,23 +32,22 @@ public class ParseManager {
         ParseCloud.callFunctionInBackground("changeUserRole", params, callback);
     }
 
-    /**
-     * Создание/получение чата с пользователем через Cloud Function
-     */
     public static void getOrCreateChat(String targetUserId, FunctionCallback<Map<String, Object>> callback) {
         HashMap<String, Object> params = new HashMap<>();
         params.put("targetUserId", targetUserId);
-        ParseCloud.callFunctionInBackground("getOrCreateChat", params, callback);
+        ParseCloud.callFunctionInBackground("getOrCreateChat", params,callback);
     }
 
-    /**
-     * Логирование
-     */
-    public static void logSuccess(String message) {
-        android.util.Log.d("ParseManager", message);
+    public static void sendMessage(String chatId, String text, FunctionCallback<Map<String, Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("chatId", chatId);
+        params.put("text", text);
+        ParseCloud.callFunctionInBackground("sendMessage", params, callback);
     }
 
-    public static void logError(ParseException e) {
-        android.util.Log.e("ParseManager", "Ошибка Parse: " + e.getMessage());
+    public static void getMessages(String chatId, FunctionCallback<Map<String, Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("chatId", chatId);
+        ParseCloud.callFunctionInBackground("getMessages", params, callback);
     }
 }

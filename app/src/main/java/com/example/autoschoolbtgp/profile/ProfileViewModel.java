@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.adminPanel.profile;
+package com.example.autoschoolbtgp.profile;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

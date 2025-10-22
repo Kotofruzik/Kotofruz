@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         } else if ("instructor".equals(role)) {
             startActivity(new Intent(this, InstructorActivity.class));
         } else {
-            startActivity(new Intent(this, StudentActivityTwo.class));
+            startActivity(new Intent(this, StudentActivity.class));
         }
     }
 }

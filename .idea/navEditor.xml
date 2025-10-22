@@ -141,7 +141,7 @@
             </LayoutPositions>
           </value>
         </entry>
-        <entry key="mobile_navigation_student.xml">
+        <entry key="mobile_navigation_instructor.xml">
           <value>
             <LayoutPositions>
               <option name="myPositions">
@@ -158,7 +158,19 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="navigation_main">
+                  <entry key="navigation_profile">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="368" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="navigation_users">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -170,7 +182,41 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="navigation_profile">
+                </map>
+              </option>
+            </LayoutPositions>
+          </value>
+        </entry>
+        <entry key="mobile_navigation_student.xml">
+          <value>
+            <LayoutPositions>
+              <option name="myPositions">
+                <map>
+                  <entry key="nav_gallery">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="226" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="nav_home">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="nav_slideshow">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">

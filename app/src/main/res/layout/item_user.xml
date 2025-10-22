@@ -11,7 +11,7 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="140dp"
         android:gravity="center_vertical"
         android:padding="12dp"
         android:background="?attr/selectableItemBackground">
@@ -84,7 +84,6 @@
                     android:text="Изменить роль"
                     android:textAllCaps="false"
                     android:drawableStart="@drawable/back"
-                    android:backgroundTint="@color/black"
                     android:textColor="@android:color/white"
                     android:layout_marginEnd="8dp"/>
             </LinearLayout>
