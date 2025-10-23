@@ -1,17 +1,11 @@
 package com.example.autoschoolbtgp.utils;
 
-import android.util.Log;
-
 import com.parse.FunctionCallback;
-import com.parse.Parse;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,31 +13,14 @@ import java.util.Map;
 public class ParseManager {
 
     /**
-     * Загрузка списка пользователей через Cloud Function
+     * Загрузка списка пользователей
      */
-    // В ParseManager.java
-
     public static void getAllUsers(FunctionCallback<List<Object>> callback) {
-        Log.d("ParseManager", "Вызов getAllUsers");
-        ParseCloud.callFunctionInBackground("getAllUsers", new HashMap<>(), new FunctionCallback<List<Object>>() {
-            @Override
-            public void done(List<Object> result, ParseException e) {
-                // --- ИСПРАВЛЕНИЕ: Проверка на null ---
-                if (e == null && result != null) {
-                    callback.done(result, null);
-                } else if (e != null) {
-                    callback.done(null, e);
-                } else {
-                    // result == null, e == null
-                    callback.done(new ArrayList<>(), null); // Передаем пустой список
-                }
-                // --- ИСПРАВЛЕНИЕ КОНЕЦ ---
-            }
-        });
+        ParseCloud.callFunctionInBackground("getAllUsers", new HashMap<>(), callback);
     }
 
     /**
-     * Смена роли пользователя через Cloud Function
+     * Смена роли пользователя
      */
     public static void changeUserRole(String userId, String newRole, FunctionCallback<Map<String, Object>> callback) {
         HashMap<String, Object> params = new HashMap<>();
@@ -52,7 +29,16 @@ public class ParseManager {
         ParseCloud.callFunctionInBackground("changeUserRole", params, callback);
     }
 
-    public static void getChatsForUser(FunctionCallback<List<Object>> callback) {
+    /**
+     * Получение или создание чата с пользователем
+     */
+    public static void getOrCreateChat(String targetUserId, FunctionCallback<Map<String, Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("targetUserId", targetUserId);
+        ParseCloud.callFunctionInBackground("getOrCreateChat", params, callback);
+    }
+
+    public static void getChatsForUser(FunctionCallback<List<Object>> callback){
         ParseCloud.callFunctionInBackground("getChatsForUser", new HashMap<>(), callback);
     }
 
@@ -75,9 +61,14 @@ public class ParseManager {
         ParseCloud.callFunctionInBackground("sendMessage", params, callback);
     }
 
-    public static void getOrCreateChat(String targetUserId, FunctionCallback<Map<String, Object>> callback) {
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("targetUserId", targetUserId);
-        ParseCloud.callFunctionInBackground("getOrCreateChat", params, callback);
+    /**
+     * Логирование
+     */
+    public static void logSuccess(String message) {
+        android.util.Log.d("ParseManager", message);
+    }
+
+    public static void logError(ParseException e) {
+        android.util.Log.e("ParseManager", "Ошибка Parse: " + e.getMessage());
     }
 }

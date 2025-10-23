@@ -16,6 +16,8 @@ public class UsersViewModel extends ViewModel {
     private MutableLiveData<List<UserModel>> usersLiveData = new MutableLiveData<>();
     private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private MutableLiveData<String> successMessageLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> chatIdLiveData = new MutableLiveData<>();
+
 
 
     public LiveData<List<UserModel>> getUsers() {
@@ -27,6 +29,9 @@ public class UsersViewModel extends ViewModel {
     }
     public LiveData<String> getSuccessMessage() {
         return successMessageLiveData;
+    }
+    public LiveData<String> getChatId() {
+        return chatIdLiveData;
     }
 
 
@@ -96,6 +101,7 @@ public class UsersViewModel extends ViewModel {
             public void done(Map<String, Object> result, ParseException e) {
                 if (e == null) {
                     String chatId = (String) result.get("chatId");
+                    chatIdLiveData.setValue(chatId);
                 } else {
                     errorLiveData.setValue(e.getMessage());
                 }

@@ -34,10 +34,6 @@ public class UsersFragment extends Fragment {
             @Override
             public void onOpenChat(UserModel user) {
                 viewModel.openChatWithUser(user.getId());
-                // Здесь открываем чат, например:
-                Intent intent = new Intent(getActivity(), ChatActivity.class);
-                intent.putExtra("chatId", "chat_id_from_backend");
-                startActivity(intent);
             }
         });
 
@@ -45,6 +41,14 @@ public class UsersFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(UsersViewModel.class);
+        viewModel.getChatId().observe(getViewLifecycleOwner(), chatId -> {
+            if (chatId != null) {
+                Intent intent = new Intent(getActivity(), ChatActivity.class);
+                intent.putExtra("chatId", chatId);
+                startActivity(intent);
+            }
+        });
+
         viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
             if (users != null) {
                 android.util.Log.d("UsersFragment", "Получено " + users.size() + " пользователей");

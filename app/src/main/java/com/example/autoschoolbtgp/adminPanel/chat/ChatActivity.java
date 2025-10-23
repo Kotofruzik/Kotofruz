@@ -1,9 +1,10 @@
-// ChatActivity.java
 package com.example.autoschoolbtgp.adminPanel.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.Button;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,10 +16,16 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.autoschoolbtgp.R;
-import com.example.autoschoolbtgp.adminPanel.chats.ChatViewModel; // <-- Используем ChatViewModel
+import com.example.autoschoolbtgp.adminPanel.chats.ChatViewModel;
+import com.example.autoschoolbtgp.adminPanel.chats.ChatsViewModel; // <-- Используем ChatViewModel
+import com.example.autoschoolbtgp.databinding.ActivityChatBinding; // <-- Убедись, что binding правильный
 
 public class ChatActivity extends AppCompatActivity {
+
+    private static final String TAG = "ChatActivity_SENIOR";
+    private ActivityChatBinding binding;
     private ChatViewModel viewModel; // <-- Используем ChatViewModel
     private MessageAdapter adapter;
 
@@ -26,69 +33,113 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_chat);
+        binding = ActivityChatBinding.inflate(getLayoutInflater()); // <-- Убедись, что binding правильный
+        setContentView(binding.getRoot());
 
         // Обработка WindowInsets (для Edge-to-Edge)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> { // <-- Убедись, что ID правильный
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
         // Инициализация RecyclerView, EditText, Button
-        RecyclerView recyclerView = findViewById(R.id.recycler_view_messages);
-        EditText editTextMessage = findViewById(R.id.edit_text_message);
-        Button buttonSend = findViewById(R.id.button_send);
-
-        // Инициализация адаптера
+        RecyclerView recyclerView = binding.recyclerViewMessages; // <-- Убедись, что ID правильный
         adapter = new MessageAdapter(); // Убедись, что MessageAdapter создан
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
         // Инициализация ViewModel
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class); // <-- Используем ChatViewModel
 
         // --- Наблюдение за сообщениями ---
-        viewModel.getMessages().observe(this, messages -> {
+        viewModel.getMessages().observe(this, messages -> { // <-- Используем ChatViewModel
             if (messages != null) {
+                Log.d(TAG, "onCreate -> messagesLiveData: Получено " + messages.size() + " сообщений");
                 adapter.updateMessages(messages);
+                // Прокручиваем вниз
+                recyclerView.scrollToPosition(messages.size() - 1);
+            } else {
+                Log.w(TAG, "onCreate -> messagesLiveData: Получен null вместо списка сообщений");
             }
         });
 
         // --- Наблюдение за ошибками ---
-        viewModel.getError().observe(this, error -> {
+        viewModel.getError().observe(this, error -> { // <-- Используем ChatViewModel
             if (error != null) {
+                Log.e(TAG, "onCreate -> errorLiveData: ОШИБКА: " + error);
                 Toast.makeText(ChatActivity.this, "Ошибка: " + error, Toast.LENGTH_LONG).show();
             }
         });
 
         // --- Наблюдение за сообщениями об успехе ---
-        viewModel.getSuccessMessage().observe(this, message -> {
+        viewModel.getSuccessMessage().observe(this, message -> { // <-- Используем ChatViewModel
             if (message != null) {
+                Log.d(TAG, "onCreate -> successMessageLiveData: СООБЩЕНИЕ: " + message);
                 Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // --- Наблюдение за состоянием загрузки ---
+        viewModel.getIsLoading().observe(this, isLoading -> { // <-- Используем ChatViewModel
+            if (isLoading != null) {
+                Log.d(TAG, "onCreate -> isLoadingLiveData: Состояние загрузки изменилось на: " + isLoading);
+                // binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE); // <-- Убедись, что ID правильный
             }
         });
         // --- Конец наблюдения ---
 
+        setupClickListeners();
+
         // Загрузка сообщений
         String chatId = getIntent().getStringExtra("chatId");
         if (chatId != null) {
-            viewModel.loadMessages(chatId); // <-- Вызываем loadMessages из ChatViewModel
+            Log.d(TAG, "onCreate: Получен chatId из Intent: " + chatId);
+            viewModel.loadMessages(chatId); // <-- Используем ChatViewModel
         } else {
-            Toast.makeText(this, "Ошибка: chatId не передан", Toast.LENGTH_SHORT).show();
+            String errorMsg = "Ошибка: chatId не передан в Intent";
+            Log.e(TAG, "onCreate: " + errorMsg);
+            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+            finish();
         }
+    }
 
-        // Отправка сообщения
-        buttonSend.setOnClickListener(v -> {
-            String text = editTextMessage.getText().toString().trim();
-            if (!text.isEmpty() && chatId != null) {
-                viewModel.sendMessage(chatId, text); // <-- Вызываем sendMessage из ChatViewModel
-                editTextMessage.setText(""); // Очищаем поле ввода
-            } else if (text.isEmpty()) {
-                Toast.makeText(this, "Введите сообщение", Toast.LENGTH_SHORT).show();
-            } else if (chatId == null) {
-                Toast.makeText(this, "Ошибка: chatId не передан", Toast.LENGTH_SHORT).show();
+    private void setupClickListeners() {
+        Log.d(TAG, "setupClickListeners: Настройка обработчиков кликов.");
+
+        // binding.btnSend.setOnClickListener(v -> { // <-- Убедись, что ID правильный
+        binding.btnSend.setOnClickListener(v -> { // <-- Используем buttonSend
+            Log.d(TAG, "btnSend: Нажата кнопка 'Отправить сообщение'.");
+            String text = binding.editTextMessage.getText().toString().trim(); // <-- Убедись, что ID правильный
+            if (TextUtils.isEmpty(text)) {
+                Log.w(TAG, "btnSend: Текст сообщения пуст.");
+                Toast.makeText(ChatActivity.this, "Введите сообщение", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String chatId = getIntent().getStringExtra("chatId");
+            if (chatId != null) {
+                Log.d(TAG, "btnSend: Отправка сообщения в чат с chatId: " + chatId);
+                viewModel.sendMessage(chatId, text); // <-- Используем ChatViewModel
+                binding.editTextMessage.setText(""); // Очищаем поле ввода
+            } else {
+                String errorMsg = "Ошибка: chatId не передан в Intent";
+                Log.e(TAG, "btnSend: " + errorMsg);
+                Toast.makeText(ChatActivity.this, errorMsg, Toast.LENGTH_LONG).show();
             }
         });
+
+        // binding.btnBack.setOnClickListener(v -> { // <-- Убедись, что ID правильный
+        binding.btnBack.setOnClickListener(v -> { // <-- Используем buttonBack
+            Log.d(TAG, "btnBack: Нажата кнопка 'Назад'.");
+            finish();
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: Уничтожение Activity.");
+        binding = null;
     }
 }
