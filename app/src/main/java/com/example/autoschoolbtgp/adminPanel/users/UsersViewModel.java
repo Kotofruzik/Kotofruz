@@ -1,5 +1,7 @@
 package com.example.autoschoolbtgp.adminPanel.users;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UsersViewModel extends ViewModel {
+    private static final String TAG = "UsersViewModel_SENIOR";
     private MutableLiveData<List<UserModel>> usersLiveData = new MutableLiveData<>();
     private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private MutableLiveData<String> successMessageLiveData = new MutableLiveData<>();
@@ -96,13 +99,17 @@ public class UsersViewModel extends ViewModel {
     }
 
     public void openChatWithUser(String targetUserId) {
+        Log.d(TAG, "openChatWithUser: начало открытия чата с пользователем с ID: " + targetUserId);
         ParseManager.getOrCreateChat(targetUserId, new FunctionCallback<Map<String, Object>>() {
             @Override
             public void done(Map<String, Object> result, ParseException e) {
                 if (e == null) {
                     String chatId = (String) result.get("chatId");
+                    String name = (String) result.get("name");
+                    Log.d(TAG, "openChatWithUser -> getOrCreateChat: SUCCESS. Чат найден/создан. chatId: " + chatId + ", name: " + name);
                     chatIdLiveData.setValue(chatId);
                 } else {
+                    Log.e(TAG, "openChatWithUser -> getOrCreateChat: ERROR. " + e.getMessage(), e);
                     errorLiveData.setValue(e.getMessage());
                 }
             }
