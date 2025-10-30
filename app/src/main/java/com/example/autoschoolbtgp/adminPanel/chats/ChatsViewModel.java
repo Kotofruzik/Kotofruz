@@ -11,19 +11,20 @@ import com.parse.FunctionCallback;
 import com.parse.ParseException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChatsListViewModel extends ViewModel {
-    private static final String TAG = "ChatsListViewModel_SENIOR";
+public class ChatsViewModel extends ViewModel {
+    private static final String TAG = "ChatsViewModel_SENIOR";
 
-    private MutableLiveData<List<ChatListModel>> chatsLiveData = new MutableLiveData<>();
+    private MutableLiveData<List<ChatModel>> chatsLiveData = new MutableLiveData<>();
     private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private MutableLiveData<String> successMessageLiveData = new MutableLiveData<>();
     // LiveData для отслеживания состояния загрузки чатов
     private MutableLiveData<Boolean> isLoadingLiveData = new MutableLiveData<>(false);
 
-    public LiveData<List<ChatListModel>> getChats() {
+    public LiveData<List<ChatModel>> getChats() {
         return chatsLiveData;
     }
 
@@ -52,7 +53,7 @@ public class ChatsListViewModel extends ViewModel {
                 isLoadingLiveData.setValue(false);
                 if (e == null) {
                     Log.d(TAG, "loadChats -> getChatsForUser: SUCCESS. Получено " + result.size() + " чатов из Parse.");
-                    List<ChatListModel> chats = new ArrayList<>();
+                    List<ChatModel> chats = new ArrayList<>();
                     for (Object obj : result) {
                         Map<String, Object> map = (Map<String, Object>) obj;
                         String id = (String) map.get("id");
@@ -60,7 +61,7 @@ public class ChatsListViewModel extends ViewModel {
                         String lastMessageText = (String) map.get("lastMessageText");
                         String lastMessageTime = (String) map.get("lastMessageTime");
                         String photoUrl = (String) map.get("photoUrl");
-                        chats.add(new ChatListModel(id, name, lastMessageText, lastMessageTime, photoUrl));
+                        chats.add(new ChatModel(id, name, lastMessageText, lastMessageTime, photoUrl));
                     }
                     chatsLiveData.setValue(chats);
                     Log.d(TAG, "loadChats -> getChatsForUser: SUCCESS. Список чатов передан в LiveData.");

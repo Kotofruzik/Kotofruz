@@ -15,17 +15,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.adminPanel.chat.ChatActivity;
-import com.example.autoschoolbtgp.databinding.FragmentChatsListBinding;
-
-import java.util.List;
+import com.example.autoschoolbtgp.databinding.FragmentChatsBinding;
 
 public class ChatsListFragment extends Fragment {
-    private static final String TAG = "ChatsListFragment_SENIOR";
-    private FragmentChatsListBinding binding;
-    private ChatsListViewModel viewModel;
-    private ChatsListAdapter adapter;
+    private static final String TAG = "ChatsFragment_SENIOR";
+    private FragmentChatsBinding binding;
+    private ChatsViewModel viewModel;
+    private ChatsAdapter adapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,13 +32,13 @@ public class ChatsListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentChatsListBinding.inflate(inflater, container, false);
+        binding = FragmentChatsBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        viewModel = new ViewModelProvider(this).get(ChatsListViewModel.class);
-        adapter = new ChatsListAdapter(new ChatsListAdapter.OnChatListClickListener() {
+        viewModel = new ViewModelProvider(this).get(ChatsViewModel.class);
+        adapter = new ChatsAdapter(new ChatsAdapter.OnChatClickListener() {
             @Override
-            public void onChatClick(ChatListModel chat) {
+            public void onChatClick(ChatModel chat) {
                 Log.d(TAG, "onChatClick: Нажат чат с ID: " + chat.getId());
                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                 intent.putExtra("chatId", chat.getId());
@@ -60,9 +57,11 @@ public class ChatsListFragment extends Fragment {
                 adapter.updateChats(chats);
                 // Если чатов нет - показываем сообщение
                 if (chats.isEmpty()) {
+                    Log.d(TAG, "onCreateView -> chatsLiveData: Список чатов пуст.");
                     binding.textViewNoChats.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                 } else {
+                    Log.d(TAG, "onCreateView -> chatsLiveData: Список чатов не пуст.");
                     binding.textViewNoChats.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                 }
@@ -73,7 +72,6 @@ public class ChatsListFragment extends Fragment {
             }
         });
 
-        // --- Наблюдение за ошибками ---
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Log.e(TAG, "onCreateView -> errorLiveData: ОШИБКА: " + error);
@@ -81,7 +79,6 @@ public class ChatsListFragment extends Fragment {
             }
         });
 
-        // --- Наблюдение за сообщениями об успехе ---
         viewModel.getSuccessMessage().observe(getViewLifecycleOwner(), message -> {
             if (message != null) {
                 Log.d(TAG, "onCreateView -> successMessageLiveData: СООБЩЕНИЕ: " + message);
@@ -89,15 +86,19 @@ public class ChatsListFragment extends Fragment {
             }
         });
 
+        // --- Наблюдение за состоянием загрузки ---
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading != null) {
                 Log.d(TAG, "onCreateView -> isLoadingLiveData: Состояние загрузки изменилось на: " + isLoading);
                 binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
         });
+        // --- Конец наблюдения ---
 
+        // --- Загрузка чатов ---
         Log.d(TAG, "onCreateView: Запуск загрузки чатов из ViewModel.");
         viewModel.loadChats();
+        // --- Конец загрузки чатов ---
 
         return view;
     }
@@ -105,6 +106,7 @@ public class ChatsListFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        Log.d(TAG, "onDestroyView: Уничтожение представления фрагмента.");
         binding = null;
     }
 }
