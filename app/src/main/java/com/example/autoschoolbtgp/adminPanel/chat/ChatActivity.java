@@ -44,6 +44,7 @@ public class ChatActivity extends AppCompatActivity {
             return insets;
         });
 
+
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         adapter = new MessageAdapter();
 
