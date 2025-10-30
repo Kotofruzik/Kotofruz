@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.adminPanel.chats;
+package com.example.autoschoolbtgp.adminPanel.chat;
 
 public class MessageModel {
     private String id;

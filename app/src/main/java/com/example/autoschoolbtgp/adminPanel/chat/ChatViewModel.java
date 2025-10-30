@@ -1,4 +1,4 @@
-package com.example.autoschoolbtgp.adminPanel.chats;
+package com.example.autoschoolbtgp.adminPanel.chat;
 
 import android.util.Log;
 
@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ChatViewModel extends ViewModel {
-
     private static final String TAG = "ChatViewModel_SENIOR";
 
     private MutableLiveData<List<MessageModel>> messagesLiveData = new MutableLiveData<>();

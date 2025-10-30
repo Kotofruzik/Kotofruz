@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_chats"
-        android:name="com.example.autoschoolbtgp.adminPanel.chats.ChatsFragment"
+        android:name="com.example.autoschoolbtgp.adminPanel.chats.ChatsListFragment"
         android:label="@string/title_chats"
         tools:layout="@layout/fragment_chats" />
 

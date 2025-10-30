@@ -18,9 +18,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.autoschoolbtgp.R;
-import com.example.autoschoolbtgp.adminPanel.chats.ChatViewModel;
 import com.example.autoschoolbtgp.databinding.ActivityChatBinding;
+
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity_SENIOR";
@@ -42,17 +44,12 @@ public class ChatActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Инициализация RecyclerView, EditText, ImageButton
-        RecyclerView recyclerView = binding.recyclerViewMessages;
-        EditText editTextMessage = binding.editTextMessage;
-        ImageButton buttonSend = binding.btnSend;
-        ImageButton buttonBack = binding.btnBack;
-
+        viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         adapter = new MessageAdapter();
+
+        RecyclerView recyclerView = binding.recyclerViewMessages;
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
-
-        viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
 
         // --- Наблюдение за сообщениями ---
         viewModel.getMessages().observe(this, messages -> {
