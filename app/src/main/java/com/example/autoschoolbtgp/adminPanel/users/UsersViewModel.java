@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
 import com.example.autoschoolbtgp.utils.ParseManager;
 import com.parse.FunctionCallback;
 import com.parse.ParseException;
@@ -16,13 +17,14 @@ import java.util.Map;
 
 public class UsersViewModel extends ViewModel {
     private static final String TAG = "UsersViewModel_SENIOR";
+
     private MutableLiveData<List<UserModel>> usersLiveData = new MutableLiveData<>();
     private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private MutableLiveData<String> successMessageLiveData = new MutableLiveData<>();
     private MutableLiveData<String> chatIdLiveData = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>(); // ← ДОБАВЛЕНО
 
-
-
+    // Геттеры
     public LiveData<List<UserModel>> getUsers() {
         return usersLiveData;
     }
@@ -30,21 +32,31 @@ public class UsersViewModel extends ViewModel {
     public LiveData<String> getError() {
         return errorLiveData;
     }
+
     public LiveData<String> getSuccessMessage() {
         return successMessageLiveData;
     }
+
     public LiveData<String> getChatId() {
         return chatIdLiveData;
     }
 
+    public LiveData<Boolean> getIsLoading() { // ← ДОБАВЛЕНО
+        return isLoading;
+    }
 
+    // Загрузка пользователей с состоянием загрузки
     public void loadUsers() {
+        isLoading.setValue(true); // ← Начало загрузки
+
         ParseManager.getAllUsers(new FunctionCallback<List<Object>>() {
             @Override
             public void done(List<Object> result, ParseException e) {
+                isLoading.postValue(false); // ← Конец загрузки (всегда!)
+
                 if (e == null) {
                     List<UserModel> users = new ArrayList<>();
-                    String currentUserId = ParseUser.getCurrentUser().getObjectId(); // Получаем ID текущего пользователя
+                    String currentUserId = ParseUser.getCurrentUser().getObjectId();
 
                     for (Object obj : result) {
                         Map<String, Object> map = (Map<String, Object>) obj;
@@ -60,16 +72,16 @@ public class UsersViewModel extends ViewModel {
                         String role = (String) map.get("role");
                         String photo = (String) map.get("photo");
 
-                        // Пропускаем пользователя с именем "kotofruzik"
+                        // Пропускаем пользователя "kotofruzik"
                         if ("kotofruzik".equals(firstName) || "kotofruzik".equals(lastName)) {
                             continue;
                         }
 
                         users.add(new UserModel(id, firstName, lastName, role, photo));
                     }
-                    usersLiveData.setValue(users);
+                    usersLiveData.postValue(users);
                 } else {
-                    errorLiveData.setValue(e.getMessage());
+                    errorLiveData.postValue(e.getMessage());
                 }
             }
         });
@@ -80,7 +92,6 @@ public class UsersViewModel extends ViewModel {
             @Override
             public void done(Map<String, Object> result, ParseException e) {
                 if (e == null) {
-                    // Обновляем роль в LiveData
                     List<UserModel> currentUsers = usersLiveData.getValue();
                     if (currentUsers != null) {
                         for (UserModel user : currentUsers) {
@@ -107,10 +118,10 @@ public class UsersViewModel extends ViewModel {
                     String chatId = (String) result.get("chatId");
                     String name = (String) result.get("name");
                     Log.d(TAG, "openChatWithUser -> getOrCreateChat: SUCCESS. Чат найден/создан. chatId: " + chatId + ", name: " + name);
-                    chatIdLiveData.setValue(chatId);
+                    chatIdLiveData.postValue(chatId);
                 } else {
                     Log.e(TAG, "openChatWithUser -> getOrCreateChat: ERROR. " + e.getMessage(), e);
-                    errorLiveData.setValue(e.getMessage());
+                    errorLiveData.postValue(e.getMessage());
                 }
             }
         });

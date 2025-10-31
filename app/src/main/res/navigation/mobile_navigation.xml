@@ -9,7 +9,7 @@
         android:id="@+id/navigation_users"
         android:name="com.example.autoschoolbtgp.adminPanel.users.UsersFragment"
         android:label="@string/title_users"
-        tools:layout="@layout/fragment_users" />
+        tools:layout="@layout/fragment_users"/>
 
     <fragment
         android:id="@+id/navigation_chats"

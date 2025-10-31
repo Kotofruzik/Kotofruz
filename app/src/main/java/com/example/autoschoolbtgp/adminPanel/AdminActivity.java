@@ -34,7 +34,24 @@ public class AdminActivity extends AppCompatActivity {
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_admin);
 
-        NavigationUI.setupWithNavController(navView, navController);
+        navView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if(itemId == R.id.navigation_users) {
+                navController.popBackStack(R.id.navigation_users, false);
+                navController.navigate(R.id.navigation_users);
+                return true;
+            } else if (itemId == R.id.navigation_chats) {
+                navController.popBackStack(R.id.navigation_chats, false);
+                navController.navigate(R.id.navigation_chats);
+                return true;
+            } else if (itemId == R.id.navigation_profile) {
+                navController.popBackStack(R.id.navigation_profile, false);
+                navController.navigate(R.id.navigation_profile);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -77,4 +94,3 @@ public class AdminActivity extends AppCompatActivity {
         }
     }
 }
-

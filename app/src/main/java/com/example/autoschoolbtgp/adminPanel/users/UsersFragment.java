@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.adminPanel.chat.ChatActivity;
 import com.example.autoschoolbtgp.databinding.FragmentUsersBinding;
-import com.example.autoschoolbtgp.adminPanel.users.UserModel;
 
 import java.util.List;
 
@@ -34,6 +33,7 @@ public class UsersFragment extends Fragment {
         binding = FragmentUsersBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
+        // Настройка RecyclerView
         RecyclerView recyclerView = binding.recyclerViewUsers;
         adapter = new UsersAdapter(new UsersAdapter.OnUserActionsListener() {
             @Override
@@ -51,41 +51,57 @@ public class UsersFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
+        // Инициализация ViewModel
         viewModel = new ViewModelProvider(this).get(UsersViewModel.class);
 
+        // --- Наблюдение за состоянием загрузки ---
+        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    // Показываем кружок, скрываем список
+                    binding.progressBar.setVisibility(View.VISIBLE);
+                    binding.recyclerViewUsers.setVisibility(View.GONE);
+                } else {
+                    // Скрываем кружок, показываем список
+                    binding.progressBar.setVisibility(View.GONE);
+                    binding.recyclerViewUsers.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        // --- Наблюдение за пользователями ---
+        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
+            if (users != null) {
+                Log.d(TAG, "Получено " + users.size() + " пользователей");
+                adapter.updateUsers(users);
+                // Убедимся, что список виден (на случай, если isLoading не пришёл)
+                binding.progressBar.setVisibility(View.GONE);
+                binding.recyclerViewUsers.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // --- Наблюдение за ошибками ---
+        viewModel.getError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Log.e(TAG, "Ошибка: " + error);
+                Toast.makeText(requireContext(), "Ошибка: " + error, Toast.LENGTH_LONG).show();
+                // Скрываем прогресс даже при ошибке
+                binding.progressBar.setVisibility(View.GONE);
+                binding.recyclerViewUsers.setVisibility(View.VISIBLE);
+            }
+        });
+
+        // --- Наблюдение за открытием чата ---
         viewModel.getChatId().observe(getViewLifecycleOwner(), chatId -> {
             if (chatId != null) {
-                Log.d(TAG, "onCreateView -> chatIdLiveData: получен chatId: " + chatId);
+                Log.d(TAG, "Получен chatId: " + chatId);
                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                 intent.putExtra("chatId", chatId);
                 startActivity(intent);
-            } else {
-                Log.w(TAG, "onCreateView -> chatIdLiveData: получен null вместо chatId");
-            }
-        });
-        // --- ИЗМЕНЕНИЕ КОНЕЦ ---
-
-        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
-            if (users != null) {
-                android.util.Log.d(TAG, "Получено " + users.size() + " пользователей");
-                adapter.updateUsers(users);
             }
         });
 
-        viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                android.util.Log.e(TAG, "Ошибка: " + error);
-                Toast.makeText(requireContext(), "Ошибка: " + error, Toast.LENGTH_LONG).show();
-            }
-        });
-
-        viewModel.getSuccessMessage().observe(getViewLifecycleOwner(), message -> {
-            if (message != null) {
-                android.util.Log.d(TAG, "Сообщение: " + message);
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        // Запуск загрузки
         viewModel.loadUsers();
 
         return view;
