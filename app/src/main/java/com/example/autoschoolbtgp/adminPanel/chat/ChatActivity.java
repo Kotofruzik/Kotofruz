@@ -1,12 +1,9 @@
 package com.example.autoschoolbtgp.adminPanel.chat;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -18,17 +15,16 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.databinding.ActivityChatBinding;
-
-import java.util.List;
+import com.parse.ParseUser;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity_SENIOR";
     private ActivityChatBinding binding;
     private ChatViewModel viewModel;
     private MessageAdapter adapter;
+    private String targetUserId; // ID собеседника
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +40,25 @@ public class ChatActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Получаем targetUserId из Intent
+        targetUserId = getIntent().getStringExtra("targetUserId");
+        if (targetUserId == null) {
+            String errorMsg = "Ошибка: не указан ID пользователя";
+            Log.e(TAG, "onCreate: " + errorMsg);
+            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
+        String currentUserId = ParseUser.getCurrentUser().getObjectId();
+        if (currentUserId == null) {
+            Toast.makeText(this, "Ошибка: пользователь не авторизован", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
-        adapter = new MessageAdapter();
+        adapter = new MessageAdapter(currentUserId);
 
         RecyclerView recyclerView = binding.recyclerViewMessages;
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -56,8 +69,9 @@ public class ChatActivity extends AppCompatActivity {
             if (messages != null) {
                 Log.d(TAG, "onCreate -> messagesLiveData: Получено " + messages.size() + " сообщений");
                 adapter.updateMessages(messages);
-                // Прокручиваем вниз
-                recyclerView.scrollToPosition(messages.size() - 1);
+                if (!messages.isEmpty()) {
+                    recyclerView.scrollToPosition(messages.size() - 1);
+                }
             } else {
                 Log.w(TAG, "onCreate -> messagesLiveData: Получен null вместо списка сообщений");
             }
@@ -86,21 +100,12 @@ public class ChatActivity extends AppCompatActivity {
                 binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
         });
-        // --- Конец наблюдения ---
 
         setupClickListeners();
 
-        // Загрузка сообщений
-        String chatId = getIntent().getStringExtra("chatId");
-        if (chatId != null) {
-            Log.d(TAG, "onCreate: Получен chatId из Intent: " + chatId);
-            viewModel.loadMessages(chatId);
-        } else {
-            String errorMsg = "Ошибка: chatId не передан в Intent";
-            Log.e(TAG, "onCreate: " + errorMsg);
-            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
-            finish();
-        }
+        // Загружаем существующие сообщения (если чат уже существует)
+        Log.d(TAG, "onCreate: Загрузка сообщений для пользователя с ID: " + targetUserId);
+        viewModel.loadMessagesForUser(targetUserId);
     }
 
     private void setupClickListeners() {
@@ -115,16 +120,9 @@ public class ChatActivity extends AppCompatActivity {
                 return;
             }
 
-            String chatId = getIntent().getStringExtra("chatId");
-            if (chatId != null) {
-                Log.d(TAG, "btnSend: Отправка сообщения в чат с chatId: " + chatId);
-                viewModel.sendMessage(chatId, text);
-                binding.editTextMessage.setText(""); // Очищаем поле ввода
-            } else {
-                String errorMsg = "Ошибка: chatId не передан в Intent";
-                Log.e(TAG, "btnSend: " + errorMsg);
-                Toast.makeText(ChatActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-            }
+            Log.d(TAG, "btnSend: Отправка сообщения пользователю с ID: " + targetUserId);
+            viewModel.sendMessageToUser(targetUserId, text);
+            binding.editTextMessage.setText(""); // Очищаем поле ввода
         });
 
         binding.btnBack.setOnClickListener(v -> {

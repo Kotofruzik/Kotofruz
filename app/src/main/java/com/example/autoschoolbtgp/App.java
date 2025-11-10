@@ -1,8 +1,11 @@
 package com.example.autoschoolbtgp;
 
 import android.app.Application;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import com.parse.Parse;
+import com.parse.ParseInstallation;
 
 public class App extends Application {
     @Override

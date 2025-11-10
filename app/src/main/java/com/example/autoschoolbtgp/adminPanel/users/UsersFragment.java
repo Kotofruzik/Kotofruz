@@ -33,7 +33,6 @@ public class UsersFragment extends Fragment {
         binding = FragmentUsersBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        // Настройка RecyclerView
         RecyclerView recyclerView = binding.recyclerViewUsers;
         adapter = new UsersAdapter(new UsersAdapter.OnUserActionsListener() {
             @Override
@@ -43,65 +42,47 @@ public class UsersFragment extends Fragment {
 
             @Override
             public void onOpenChat(UserModel user) {
-                Log.d(TAG, "onOpenChat: нажата кнопка 'открыть чат' для пользователя с ID: " + user.getId());
-                viewModel.openChatWithUser(user.getId());
+                Intent intent = new Intent(getActivity(), ChatActivity.class);
+                intent.putExtra("targetUserId", user.getId());
+                startActivity(intent);
             }
         });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
-        // Инициализация ViewModel
         viewModel = new ViewModelProvider(this).get(UsersViewModel.class);
 
-        // --- Наблюдение за состоянием загрузки ---
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading != null) {
                 if (isLoading) {
-                    // Показываем кружок, скрываем список
                     binding.progressBar.setVisibility(View.VISIBLE);
                     binding.recyclerViewUsers.setVisibility(View.GONE);
                 } else {
-                    // Скрываем кружок, показываем список
                     binding.progressBar.setVisibility(View.GONE);
                     binding.recyclerViewUsers.setVisibility(View.VISIBLE);
                 }
             }
         });
 
-        // --- Наблюдение за пользователями ---
         viewModel.getUsers().observe(getViewLifecycleOwner(), users -> {
             if (users != null) {
                 Log.d(TAG, "Получено " + users.size() + " пользователей");
                 adapter.updateUsers(users);
-                // Убедимся, что список виден (на случай, если isLoading не пришёл)
                 binding.progressBar.setVisibility(View.GONE);
                 binding.recyclerViewUsers.setVisibility(View.VISIBLE);
             }
         });
 
-        // --- Наблюдение за ошибками ---
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Log.e(TAG, "Ошибка: " + error);
                 Toast.makeText(requireContext(), "Ошибка: " + error, Toast.LENGTH_LONG).show();
-                // Скрываем прогресс даже при ошибке
                 binding.progressBar.setVisibility(View.GONE);
                 binding.recyclerViewUsers.setVisibility(View.VISIBLE);
             }
         });
 
-        // --- Наблюдение за открытием чата ---
-        viewModel.getChatId().observe(getViewLifecycleOwner(), chatId -> {
-            if (chatId != null) {
-                Log.d(TAG, "Получен chatId: " + chatId);
-                Intent intent = new Intent(getActivity(), ChatActivity.class);
-                intent.putExtra("chatId", chatId);
-                startActivity(intent);
-            }
-        });
-
-        // Запуск загрузки
         viewModel.loadUsers();
 
         return view;

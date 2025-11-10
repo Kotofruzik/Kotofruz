@@ -11,64 +11,70 @@ import com.parse.FunctionCallback;
 import com.parse.ParseException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ChatsViewModel extends ViewModel {
     private static final String TAG = "ChatsViewModel_SENIOR";
 
-    private MutableLiveData<List<ChatModel>> chatsLiveData = new MutableLiveData<>();
-    private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
-    private MutableLiveData<String> successMessageLiveData = new MutableLiveData<>();
-    // LiveData для отслеживания состояния загрузки чатов
-    private MutableLiveData<Boolean> isLoadingLiveData = new MutableLiveData<>(false);
+    private MutableLiveData<List<ChatModel>> chats = new MutableLiveData<>();
+    private MutableLiveData<String> error = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     public LiveData<List<ChatModel>> getChats() {
-        return chatsLiveData;
+        return chats;
     }
 
     public LiveData<String> getError() {
-        return errorLiveData;
-    }
-
-    public LiveData<String> getSuccessMessage() {
-        return successMessageLiveData;
+        return error;
     }
 
     public LiveData<Boolean> getIsLoading() {
-        return isLoadingLiveData;
+        return isLoading;
     }
 
     /**
-     * Загружает список чатов текущего пользователя
+     * Загружает список чатов для текущего пользователя
      */
     public void loadChats() {
-        Log.d(TAG, "loadChats: Начало загрузки списка чатов.");
-        isLoadingLiveData.setValue(true);
+        isLoading.setValue(true);
+        error.setValue(null);
 
         ParseManager.getChatsForUser(new FunctionCallback<List<Object>>() {
             @Override
             public void done(List<Object> result, ParseException e) {
-                isLoadingLiveData.setValue(false);
-                if (e == null) {
-                    Log.d(TAG, "loadChats -> getChatsForUser: SUCCESS. Получено " + result.size() + " чатов из Parse.");
-                    List<ChatModel> chats = new ArrayList<>();
+                isLoading.postValue(false);
+                if (e == null && result != null) {
+                    List<ChatModel> chatList = new ArrayList<>();
                     for (Object obj : result) {
-                        Map<String, Object> map = (Map<String, Object>) obj;
-                        String id = (String) map.get("id");
-                        String name = (String) map.get("name");
-                        String lastMessageText = (String) map.get("lastMessageText");
-                        String lastMessageTime = (String) map.get("lastMessageTime");
-                        String photoUrl = (String) map.get("photoUrl");
-                        chats.add(new ChatModel(id, name, lastMessageText, lastMessageTime, photoUrl));
+                        try {
+                            Map<String, Object> map = (Map<String, Object>) obj;
+                            String id = (String) map.get("id");
+                            String senderId = (String) map.get("senderId");
+                            String receiverId = (String) map.get("receiverId");
+                            String name = (String) map.get("name");
+                            String lastMessageText = (String) map.get("lastMessageText");
+                            String lastMessageTime = (String) map.get("lastMessageTime");
+                            String photoUrl = (String) map.get("photoUrl");
+
+                            chatList.add(new ChatModel(
+                                    id,
+                                    senderId,
+                                    receiverId,
+                                    name != null ? name : "Без имени",
+                                    lastMessageText,
+                                    lastMessageTime,
+                                    photoUrl
+                            ));
+                        } catch (Exception ex) {
+                            Log.e(TAG, "Ошибка парсинга чата: " + ex.getMessage(), ex);
+                        }
                     }
-                    chatsLiveData.setValue(chats);
-                    Log.d(TAG, "loadChats -> getChatsForUser: SUCCESS. Список чатов передан в LiveData.");
+                    chats.postValue(chatList);
                 } else {
-                    String errorMsg = "Ошибка загрузки чатов: " + e.getMessage();
-                    Log.e(TAG, "loadChats -> getChatsForUser: ERROR. " + errorMsg, e);
-                    errorLiveData.setValue(errorMsg);
+                    String errorMsg = e != null ? e.getMessage() : "Неизвестная ошибка";
+                    Log.e(TAG, "Ошибка загрузки чатов: " + errorMsg);
+                    error.postValue(errorMsg);
                 }
             }
         });

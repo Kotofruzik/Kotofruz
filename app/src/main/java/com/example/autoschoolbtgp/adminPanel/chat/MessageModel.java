@@ -1,27 +1,26 @@
 package com.example.autoschoolbtgp.adminPanel.chat;
 
+import java.util.Date;
+
 public class MessageModel {
     private String id;
-    private String chatId;
+    private String text;
     private String senderId;
     private String senderName;
-    private String text;
-    private String createdAt;
+    private Date createdAt;
 
-    public MessageModel(String id, String chatId, String senderId, String senderName, String text, String createdAt) {
+    public MessageModel(String id, String text, String senderId, String senderName, Date createdAt) {
         this.id = id;
-        this.chatId = chatId;
+        this.text = text;
         this.senderId = senderId;
         this.senderName = senderName;
-        this.text = text;
         this.createdAt = createdAt;
     }
 
     // Getters
     public String getId() { return id; }
-    public String getChatId() { return chatId; }
+    public String getText() { return text; }
     public String getSenderId() { return senderId; }
     public String getSenderName() { return senderName; }
-    public String getText() { return text; }
-    public String getCreatedAt() { return createdAt; }
+    public Date getCreatedAt() { return createdAt; }
 }
