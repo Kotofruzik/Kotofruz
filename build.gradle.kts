@@ -3,7 +3,7 @@ import org.gradle.api.tasks.Delete
 plugins {
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
     id("org.jetbrains.kotlin.kapt") version "2.2.20" apply false
-    id("com.android.application") version "8.13.0" apply false
+    id("com.android.application") version "8.13.1" apply false
 }
 
 
@@ -14,8 +14,9 @@ buildscript {
         maven("https://jitpack.io")
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.13.0")
+        classpath("com.android.tools.build:gradle:8.13.1")
         classpath(kotlin("gradle-plugin", version = "1.9.10"))
+        classpath("com.google.gms:google-services:4.4.4")
     }
 }
 

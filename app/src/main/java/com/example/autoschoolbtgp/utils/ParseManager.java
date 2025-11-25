@@ -42,6 +42,20 @@ public class ParseManager {
         params.put("text", text);
         ParseCloud.callFunctionInBackground("sendMessageToUser", params, callback);
     }
+
+    public static void sendMessageToChat(String chatId, String recipientId, String text, FunctionCallback<Map<String, Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("chat", chatId);        // ← КЛЮЧ "chat", значение — твой chatId
+        params.put("recipientId", recipientId);
+        params.put("text", text);
+        ParseCloud.callFunctionInBackground("sendMessageToChat", params, callback);
+    }
+
+    public static void getMessagesForChat(String chatId, FunctionCallback<List<Object>> callback) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("chat", chatId);        // ← тоже "chat"
+        ParseCloud.callFunctionInBackground("getMessagesForChat", params, callback);
+    }
     public static void logout() {
         ParseUser.logOut();
     }

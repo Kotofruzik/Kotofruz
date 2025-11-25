@@ -19,12 +19,14 @@ import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.databinding.ActivityChatBinding;
 import com.parse.ParseUser;
 
-public class ChatActivity extends AppCompatActivity {
+// 👇 Добавляем имплементацию ChatManager.ChatCallback
+public class ChatActivity extends AppCompatActivity implements ChatManager.ChatCallback {
     private static final String TAG = "ChatActivity_SENIOR";
     private ActivityChatBinding binding;
     private ChatViewModel viewModel;
     private MessageAdapter adapter;
     private String targetUserId; // ID собеседника
+    private String currentChatId; // будем использовать как уникальный ID чата
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +35,7 @@ public class ChatActivity extends AppCompatActivity {
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Обработка WindowInsets (для Edge-to-Edge)
+        // Обработка WindowInsets
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -57,6 +59,12 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
+        // 👇 Формируем уникальный chatId (например, отсортированная пара ID)
+        // Это нужно, чтобы один и тот же чат был на обоих устройствах
+        String id1 = currentUserId.compareTo(targetUserId) < 0 ? currentUserId : targetUserId;
+        String id2 = currentUserId.compareTo(targetUserId) < 0 ? targetUserId : currentUserId;
+        currentChatId = id1 + "_" + id2;
+
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         adapter = new MessageAdapter(currentUserId);
 
@@ -64,7 +72,13 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
-        // --- Наблюдение за сообщениями ---
+        // 🔻 УДАЛЯЕМ WebSocket-подключение
+        // Было: viewModel.connectToChat(targetUserId);
+
+        // Подписываемся на события от ChatManager (для silent push)
+        ChatManager.getInstance().setCallback(this);
+
+        // Наблюдение за сообщениями из ViewModel (загружаются при старте)
         viewModel.getMessages().observe(this, messages -> {
             if (messages != null) {
                 Log.d(TAG, "onCreate -> messagesLiveData: Получено " + messages.size() + " сообщений");
@@ -77,7 +91,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // --- Наблюдение за ошибками ---
         viewModel.getError().observe(this, error -> {
             if (error != null) {
                 Log.e(TAG, "onCreate -> errorLiveData: ОШИБКА: " + error);
@@ -85,7 +98,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // --- Наблюдение за сообщениями об успехе ---
         viewModel.getSuccessMessage().observe(this, message -> {
             if (message != null) {
                 Log.d(TAG, "onCreate -> successMessageLiveData: СООБЩЕНИЕ: " + message);
@@ -93,7 +105,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // --- Наблюдение за состоянием загрузки ---
         viewModel.getIsLoading().observe(this, isLoading -> {
             if (isLoading != null) {
                 Log.d(TAG, "onCreate -> isLoadingLiveData: Состояние загрузки изменилось на: " + isLoading);
@@ -103,9 +114,9 @@ public class ChatActivity extends AppCompatActivity {
 
         setupClickListeners();
 
-        // Загружаем существующие сообщения (если чат уже существует)
-        Log.d(TAG, "onCreate: Загрузка сообщений для пользователя с ID: " + targetUserId);
-        viewModel.loadMessagesForUser(targetUserId);
+        // Загружаем существующие сообщения
+        Log.d(TAG, "onCreate: Загрузка сообщений для чата: " + currentChatId);
+        viewModel.loadMessagesForChat(currentChatId); // ⚠️ изменили метод — см. ниже
     }
 
     private void setupClickListeners() {
@@ -120,9 +131,10 @@ public class ChatActivity extends AppCompatActivity {
                 return;
             }
 
-            Log.d(TAG, "btnSend: Отправка сообщения пользователю с ID: " + targetUserId);
-            viewModel.sendMessageToUser(targetUserId, text);
-            binding.editTextMessage.setText(""); // Очищаем поле ввода
+            // Отправляем сообщение в чат
+            Log.d(TAG, "btnSend: Отправка сообщения в чат: " + currentChatId);
+            viewModel.sendMessageToChat(currentChatId, text, targetUserId); // ⚠️ обновили сигнатуру
+            binding.editTextMessage.setText("");
         });
 
         binding.btnBack.setOnClickListener(v -> {
@@ -131,10 +143,21 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    // 👇 Реализация ChatManager.ChatCallback
+    @Override
+    public void onNewMessage(String chatId) {
+        // Проверяем, что пришло сообщение именно в наш чат
+        if (currentChatId.equals(chatId)) {
+            Log.d(TAG, "onNewMessage: Получено новое сообщение для текущего чата — обновляем.");
+            viewModel.loadMessagesForChat(currentChatId);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: Уничтожение Activity.");
+        ChatManager.getInstance().setCallback(null); // отписываемся
         binding = null;
     }
 }
