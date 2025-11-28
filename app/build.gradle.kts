@@ -74,8 +74,5 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("com.github.CanHub:Android-Image-Cropper:4.3.3")
 
-    implementation("io.socket:socket.io-client:2.1.0")
-
-    implementation("com.google.firebase:firebase-messaging:25.0.1")
-    implementation("com.github.parse-community.Parse-SDK-Android:parse:1.26.0")
+    implementation("androidx.cardview:cardview:1.0.0")
 }

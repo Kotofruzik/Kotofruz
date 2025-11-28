@@ -2,8 +2,8 @@ package com.example.autoschoolbtgp.adminPanel.chat;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.autoschoolbtgp.R;
 import com.example.autoschoolbtgp.databinding.ActivityChatBinding;
+import com.google.android.material.textfield.TextInputEditText;
 import com.parse.ParseUser;
 
 public class ChatActivity extends AppCompatActivity {
@@ -29,15 +30,8 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         targetUserId = getIntent().getStringExtra("targetUserId");
         if (targetUserId == null) {
@@ -87,7 +81,13 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         setupClickListeners();
-        viewModel.loadMessagesForUser(targetUserId); // ← старый метод: по targetUserId
+        viewModel.loadMessagesForUser(targetUserId); // Старый метод: по targetUserId
+
+        // Фокус на поле ввода при запуске
+        binding.editTextMessage.requestFocus();
+
+        // Показать клавиатуру
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     private void setupClickListeners() {
@@ -97,7 +97,7 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(this, "Введите сообщение", Toast.LENGTH_SHORT).show();
                 return;
             }
-            viewModel.sendMessageToUser(targetUserId, text); // ← старый метод
+            viewModel.sendMessageToUser(targetUserId, text); // Старый метод
             binding.editTextMessage.setText("");
         });
 

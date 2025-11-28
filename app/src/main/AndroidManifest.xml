@@ -22,6 +22,7 @@
             android:theme="@style/Theme.AutoschoolBTGP.NoActionBar" />
         <activity
             android:name=".adminPanel.chat.ChatActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false" />
         <activity
             android:name="com.canhub.cropper.CropImageActivity"

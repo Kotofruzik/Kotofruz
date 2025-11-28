@@ -5,8 +5,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.Firebase;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.parse.Parse;
 import com.parse.ParseInstallation;
 import com.parse.ParseUser;
@@ -17,9 +15,9 @@ public class App extends Application {
         super.onCreate();
 
         Parse.initialize(new Parse.Configuration.Builder(this)
-                .applicationId("Q1tuULttUpvqlPEzH2htnph5sHK6VJvD50rBsywv")  // замените на ваш applicationId
-                .clientKey("YOzg5tkHlzW08CBXggeOze8iG6Tx5LWx7gD83S33")          // замените на ваш clientKey
-                .server("https://parseapi.back4app.com/") // URL сервера Parse
+                .applicationId("Q1tuULttUpvqlPEzH2htnph5sHK6VJvD50rBsywv")
+                .clientKey("YOzg5tkHlzW08CBXggeOze8iG6Tx5LWx7gD83S33")
+                .server("https://parseapi.back4app.com/")
                 .build()
         );
     }

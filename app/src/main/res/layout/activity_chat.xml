@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- Кнопка "Назад" -->
     <ImageButton
@@ -47,7 +48,7 @@
         app:layout_constraintTop_toBottomOf="@id/btn_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/input_layout_message" />
+        app:layout_constraintBottom_toTopOf="@id/card_input_container" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -59,52 +60,61 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/input_layout_message"
+    <!-- CardView с тенью для поля ввода -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_input_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="6dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        app:boxBackgroundMode="outline"
-        app:boxStrokeColor="@color/black"
-        app:boxStrokeWidth="2dp"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp">
-
-        <FrameLayout
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_layout_message"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/black"
+            app:boxStrokeWidth="2dp"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_text_message"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Введите сообщение"
-                android:inputType="textMultiLine"
-                android:maxLines="4"
-                android:paddingEnd="48dp"/>
+                android:layout_height="wrap_content">
 
-            <ImageButton
-                android:id="@+id/btn_send"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="end|center_vertical"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/send"
-                android:contentDescription="Отправить"
-                android:padding="8dp"
-                android:clickable="true"
-                android:focusable="true" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_text_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Введите сообщение"
+                    android:inputType="textMultiLine"
+                    android:textColorHint="@color/black"
+                    android:maxLines="4"
+                    android:paddingEnd="48dp" />
 
-        </FrameLayout>
+                <ImageButton
+                    android:id="@+id/btn_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="Отправить"
+                    android:focusable="true"
+                    android:padding="5dp"
+                    android:src="@drawable/send" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+            </FrameLayout>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
