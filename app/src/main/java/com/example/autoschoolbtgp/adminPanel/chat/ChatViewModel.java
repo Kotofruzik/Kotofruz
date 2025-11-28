@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel;
 import com.example.autoschoolbtgp.utils.ParseManager;
 import com.parse.FunctionCallback;
 import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,149 +25,83 @@ public class ChatViewModel extends ViewModel {
     private MutableLiveData<String> successMessage = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
-    // chatId в формате "user1_user2" — уникальный идентификатор чата
-    private String currentChatId;
+    public LiveData<List<MessageModel>> getMessages() { return messages; }
+    public LiveData<String> getError() { return error; }
+    public LiveData<String> getSuccessMessage() { return successMessage; }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
 
-    public LiveData<List<MessageModel>> getMessages() {
-        return messages;
-    }
-
-    public LiveData<String> getError() {
-        return error;
-    }
-
-    public LiveData<String> getSuccessMessage() {
-        return successMessage;
-    }
-
-    public LiveData<Boolean> getIsLoading() {
-        return isLoading;
-    }
-
-    // 🔻 ЗАГРУЗКА СООБЩЕНИЙ ДЛЯ ЧАТА (по chatId)
-    public void loadMessagesForChat(String chatId) {
-        Log.d(TAG, "🔍 loadMessagesForChat: загрузка для chatId = " + chatId);
-        if (chatId == null || chatId.isEmpty()) {
-            Log.e(TAG, "❌ chatId пустой или null!");
-            error.postValue("Ошибка: ID чата не указан");
+    // Загрузка по targetUserId (как раньше)
+    public void loadMessagesForUser(String targetUserId) {
+        if (targetUserId == null || targetUserId.isEmpty()) {
+            error.setValue("ID пользователя не указан");
             return;
         }
 
-        this.currentChatId = chatId;
         isLoading.setValue(true);
-        error.setValue(null);
-
-        ParseManager.getMessagesForChat(chatId, new FunctionCallback<List<Object>>() {
+        ParseManager.getMessagesForUserPair(targetUserId, new FunctionCallback<List<Object>>() {
             @Override
             public void done(List<Object> result, ParseException e) {
-                isLoading.postValue(false);
-                Log.d(TAG, "📥 getMessagesForChat: результат получен. Ошибка = " + e);
-
+                isLoading.setValue(false);
                 if (e != null) {
-                    Log.e(TAG, "❌ Ошибка Parse: " + e.getMessage(), e);
-                    error.postValue("Ошибка загрузки: " + e.getMessage());
+                    error.setValue("Ошибка загрузки: " + e.getMessage());
                     return;
                 }
 
-                if (result == null) {
-                    Log.w(TAG, "⚠️ Результат null — устанавливаем пустой список");
-                    messages.postValue(new ArrayList<>());
-                    return;
-                }
-
-                Log.d(TAG, "📊 Получено объектов: " + result.size());
                 List<MessageModel> messageList = new ArrayList<>();
-
-                for (int i = 0; i < result.size(); i++) {
-                    Object obj = result.get(i);
-                    Log.d(TAG, "📄 Объект " + i + ": " + obj);
-
-                    if (!(obj instanceof Map)) {
-                        Log.w(TAG, "⚠️ Объект " + i + " не Map — пропускаем");
-                        continue;
-                    }
-
-                    try {
-                        Map<String, Object> map = (Map<String, Object>) obj;
-
-                        String id = safeGetString(map, "id", "");
-                        String text = (String) map.get("text");
-                        String senderId = safeGetString(map, "senderId", "");
-                        String senderName = safeGetString(map, "senderName", "[без имени]");
-                        Object createdAtObj = map.get("createdAt");
-
-                        Date createdAt = new Date();
-                        if (createdAtObj instanceof String) {
-                            String isoDate = (String) createdAtObj;
-                            try {
-                                if (isoDate.endsWith("Z")) {
-                                    isoDate = isoDate.substring(0, isoDate.length() - 1) + "+0000";
-                                }
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
-                                createdAt = sdf.parse(isoDate);
-                            } catch (Exception ex) {
-                                Log.w(TAG, "⚠️ Не удалось распарсить дату: " + isoDate, ex);
-                            }
+                if (result != null) {
+                    for (Object obj : result) {
+                        if (obj instanceof Map) {
+                            Map<String, Object> map = (Map<String, Object>) obj;
+                            String id = safeGetString(map, "id", "");
+                            String text = (String) map.get("text");
+                            String senderId = safeGetString(map, "senderId", "");
+                            String senderName = safeGetString(map, "senderName", "[без имени]");
+                            Date createdAt = parseDate(map.get("createdAt"));
+                            messageList.add(new MessageModel(id, text, senderId, senderName, createdAt));
                         }
-
-                        messageList.add(new MessageModel(id, text, senderId, senderName, createdAt));
-
-                    } catch (Exception ex) {
-                        Log.e(TAG, "💥 Ошибка парсинга сообщения " + i, ex);
                     }
                 }
-
-                Log.d(TAG, "✅ Обработано сообщений: " + messageList.size());
-                messages.postValue(messageList);
+                messages.setValue(messageList);
             }
         });
     }
 
-    // 🔻 ОТПРАВКА СООБЩЕНИЯ В ЧАТ (chatId + recipientId для Cloud Code)
-    public void sendMessageToChat(String chatId, String text, String recipientId) {
-        Log.d(TAG, "📤 sendMessageToChat: chatId=" + chatId + ", recipientId=" + recipientId);
+    // Отправка по targetUserId
+    public void sendMessageToUser(String targetUserId, String text) {
         if (text == null || text.trim().isEmpty()) {
             error.setValue("Сообщение не может быть пустым");
             return;
         }
 
-        if (chatId == null || recipientId == null) {
-            error.setValue("Ошибка: не хватает данных для отправки");
-            return;
-        }
-
         isLoading.setValue(true);
-        error.setValue(null);
-
-        ParseManager.sendMessageToChat(chatId, recipientId, text, new FunctionCallback<Map<String, Object>>() {
+        ParseManager.sendMessageToUser(targetUserId, text, new FunctionCallback<Map<String, Object>>() {
             @Override
             public void done(Map<String, Object> result, ParseException e) {
-                isLoading.postValue(false);
+                isLoading.setValue(false);
                 if (e == null) {
-                    Log.d(TAG, "✅ Сообщение успешно отправлено в Parse");
-                    successMessage.postValue("Сообщение отправлено");
-                    // Optional: можно сразу добавить в список, но лучше ждать push
+                    successMessage.setValue("Сообщение отправлено");
+                    loadMessagesForUser(targetUserId); // перезагрузка
                 } else {
-                    Log.e(TAG, "❌ Ошибка отправки: " + e.getMessage(), e);
-                    error.postValue("Ошибка: " + e.getMessage());
+                    error.setValue("Ошибка: " + e.getMessage());
                 }
             }
         });
     }
 
-    private String safeGetString(Map<String, Object> map, String key, String defaultValue) {
-        Object value = map.get(key);
-        if (value instanceof String) {
-            return (String) value;
-        }
-        Log.w(TAG, "⚠️ Ключ '" + key + "' отсутствует или не строка. Тип: " + (value != null ? value.getClass().getSimpleName() : "null"));
-        return defaultValue;
+    private String safeGetString(Map<String, Object> map, String key, String def) {
+        Object val = map.get(key);
+        return (val instanceof String) ? (String) val : def;
     }
 
-    // onCleared остаётся пустым — нет сокетов
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        Log.d(TAG, "🧹 ChatViewModel очищен");
+    private Date parseDate(Object dateObj) {
+        if (dateObj instanceof String) {
+            try {
+                String iso = ((String) dateObj).replace("Z", "+0000");
+                return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(iso);
+            } catch (Exception e) {
+                return new Date();
+            }
+        }
+        return new Date();
     }
 }

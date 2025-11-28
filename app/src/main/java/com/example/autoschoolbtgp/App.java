@@ -22,16 +22,5 @@ public class App extends Application {
                 .server("https://parseapi.back4app.com/") // URL сервера Parse
                 .build()
         );
-
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                String token = task.getResult();
-                ParseUser currentUser = ParseUser.getCurrentUser();
-                if (currentUser != null) {
-                    currentUser.put("deviceToken", token);
-                    currentUser.saveInBackground();
-                }
-            }
-        });
     }
 }
