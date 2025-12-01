@@ -10,4 +10,5 @@
     <color name="aqua">#00FFFF</color>
     <color name="violet">#FF00Ff</color>
     <color name="gray">#D3D3D3</color>
+    <color name="dark_gray">#6D6767</color>
 </resources>

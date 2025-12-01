@@ -20,6 +20,8 @@ import com.example.autoschoolbtgp.databinding.ActivityChatBinding;
 import com.google.android.material.textfield.TextInputEditText;
 import com.parse.ParseUser;
 
+import java.util.ArrayList;
+
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity_SENIOR";
     private ActivityChatBinding binding;
@@ -48,18 +50,21 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
-        adapter = new MessageAdapter(currentUserId);
+        adapter = new MessageAdapter(currentUserId != null ? currentUserId : "");
 
         RecyclerView recyclerView = binding.recyclerViewMessages;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        // Наблюдение за сообщениями
+        // Изначально пустой список сообщений
+        adapter.updateMessages(new ArrayList<>());
+
+        // Добавленное наблюдение за сообщениями
         viewModel.getMessages().observe(this, messages -> {
             if (messages != null) {
                 adapter.updateMessages(messages);
                 if (!messages.isEmpty()) {
-                    recyclerView.scrollToPosition(messages.size() - 1);
+                    binding.recyclerViewMessages.scrollToPosition(messages.size() - 1);
                 }
             }
         });
@@ -81,12 +86,9 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         setupClickListeners();
-        viewModel.loadMessagesForUser(targetUserId); // Старый метод: по targetUserId
+        viewModel.loadMessagesForUser(targetUserId);
 
-        // Фокус на поле ввода при запуске
         binding.editTextMessage.requestFocus();
-
-        // Показать клавиатуру
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
@@ -97,7 +99,7 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(this, "Введите сообщение", Toast.LENGTH_SHORT).show();
                 return;
             }
-            viewModel.sendMessageToUser(targetUserId, text); // Старый метод
+            viewModel.sendMessageToUser(targetUserId, text);
             binding.editTextMessage.setText("");
         });
 
