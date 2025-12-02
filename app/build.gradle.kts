@@ -75,4 +75,6 @@ dependencies {
     implementation("com.github.CanHub:Android-Image-Cropper:4.3.3")
 
     implementation("androidx.cardview:cardview:1.0.0")
+
+    implementation("com.google.fire")
 }

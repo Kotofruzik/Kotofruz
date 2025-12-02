@@ -2,6 +2,7 @@ package com.example.autoschoolbtgp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -12,6 +13,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.autoschoolbtgp.adminPanel.AdminActivity;
 import com.parse.ParseUser;
+
+import com.parse.ParseCloud;
+import com.parse.FunctionCallback;
+import com.parse.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InstructorActivity extends AppCompatActivity {
 
@@ -25,6 +32,9 @@ public class InstructorActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Button btnSendTestPush = findViewById(R.id.btnSendTestPush);
+        btnSendTestPush.setOnClickListener(v -> sendTestPush());
     }
 
     @Override
@@ -59,10 +69,31 @@ public class InstructorActivity extends AppCompatActivity {
                             startActivity(intent);
                             finish();
                         }
-                        // Если роль instructor — остаёмся здесь
                     }
                 }
             });
         }
+    }
+
+    private void sendTestPush() {
+        Map<String, Object> params = new HashMap<>(); // без параметров
+
+        ParseCloud.callFunctionInBackground("sendTestPushToAll", params,
+                (result, e) -> {
+                    if (e == null) {
+                        runOnUiThread(() ->
+                                Toast.makeText(this,
+                                        "Тестовый push отправлен",
+                                        Toast.LENGTH_SHORT).show()
+                        );
+                    } else {
+                        e.printStackTrace();
+                        runOnUiThread(() ->
+                                Toast.makeText(this,
+                                        "Ошибка отправки push: " + e.getMessage(),
+                                        Toast.LENGTH_LONG).show()
+                        );
+                    }
+                });
     }
 }
