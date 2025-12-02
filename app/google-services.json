@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "167367656946",
-    "project_id": "autoschoolbtgp-8404e",
-    "storage_bucket": "autoschoolbtgp-8404e.firebasestorage.app"
+    "project_number": "783885501862",
+    "project_id": "autoschoolbtgp-f16e1",
+    "storage_bucket": "autoschoolbtgp-f16e1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:167367656946:android:b14a4f693f452e8c42176b",
+        "mobilesdk_app_id": "1:783885501862:android:45e441c8470e5d8755bb67",
         "android_client_info": {
           "package_name": "com.example.autoschoolbtgp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBUGRIhsnMBD3F0x-dIAX7T1Yj4IgBSW7Q"
+          "current_key": "AIzaSyDcjLK-jtmAsw2MiH1u3xyDxXPv0IvPsEQ"
         }
       ],
       "services": {
