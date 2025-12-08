@@ -76,7 +76,12 @@ dependencies {
 
     implementation("androidx.cardview:cardview:1.0.0")
 
-    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
-    
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.work:work-runtime:2.11.0")
+
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 }
