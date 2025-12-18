@@ -3,14 +3,19 @@ package com.example.autoschoolbtgp;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.nfc.Tag;
 import android.os.Build;
 import android.util.Log;
 
+import com.google.firebase.Firebase;
+import com.google.firebase.FirebaseApp;
 import com.parse.Parse;
 import com.parse.ParseInstallation;
 import com.parse.ParsePush;
 
 public class App extends Application {
+    private static final String TAG = "App";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -46,5 +51,14 @@ public class App extends Application {
                Log.i("PARSE", "Push subscribed - deviceToken now be saved");
            }
         });
+
+        FirebaseApp.initializeApp(this);
+        Log.d("MyApp", "Приложение запущено");
+
+        if (FirebaseApp.getApps(this).isEmpty()){
+            Log.e("MyApp", "FirebaseApp пуст");
+        } else {
+            Log.d("MyApp", "Firebase успешно инициализирован!");
+        }
     }
 }

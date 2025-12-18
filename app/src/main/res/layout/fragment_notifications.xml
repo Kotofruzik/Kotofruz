@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Заголовок -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Уведомления"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Кнопка тестового уведомления -->
+    <Button
+        android:id="@+id/btn_test_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Тестовое уведомление"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Кнопка напоминания на завтра -->
+    <Button
+        android:id="@+id/btn_tomorrow_reminder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Напомнить завтра" />
+
+</LinearLayout>

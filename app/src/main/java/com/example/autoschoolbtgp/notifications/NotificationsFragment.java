@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +17,7 @@ import androidx.work.WorkManager;
 import androidx.work.NetworkType;
 
 import java.util.concurrent.TimeUnit;
+import com.example.autoschoolbtgp.R;
 
 public class NotificationsFragment extends Fragment {
 
@@ -24,7 +26,20 @@ public class NotificationsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_notifications, container, false);
+        View view = inflater.inflate(R.layout.fragment_notifications, container, false);
+
+        Button testButton = view.findViewById(R.id.btn_test_notification);
+        Button remindButton = view.findViewById(R.id.btn_tomorrow_reminder);
+
+        testButton.setOnClickListener(v -> {
+            scheduleNotification("Тестовое уведомление", 5000);
+
+        });
+
+        remindButton.setOnClickListener(v -> {
+           scheduleNotification("Не забудьте завтра", 24 * 60 * 60 * 1000);
+        });
+        return view;
     }
 
     private void scheduleNotification(String message, long delay) {
